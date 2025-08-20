@@ -1,0 +1,36 @@
+import { NextResponse } from 'next/server';
+import jwt from 'jsonwebtoken';
+import Admin from '@/models/Admin';
+import { connectDB } from '@/lib/db';
+import Reception from '@/models/Reception';
+
+const JWT_SECRET = process.env.JWT_SECRET;
+
+export async function POST(req) {
+  await connectDB();
+
+  try {
+    const { email, password } = await req.json();
+
+    if (!email || !password) {
+      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
+    }
+
+    const reception = await Reception.findOne({ email });
+    if (!reception) {
+      return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
+    }
+
+    const isMatch = await reception.comparePassword(password);
+    if (!isMatch) {
+      return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
+    }
+
+    const token = jwt.sign({ id: reception._id, role: 'reception' }, JWT_SECRET, { expiresIn: '7d' });
+
+    return NextResponse.json({ message: 'Login successful', token });
+  } catch (err) {
+    console.error('Login error:', err);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}
