@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import { connectDB } from '@/lib/db';
 import AdventureBooking from '@/models/AdventureBooking';
+import { getTokenData } from '@/lib/jwt';
 
 export async function POST(req) {
   try {
@@ -13,7 +14,15 @@ export async function POST(req) {
       totalAmount,
       adventureDate
     } = body;
-
+     const authHeader = req.headers.get('authorization') || '';
+        const token = authHeader.split(' ')[1];
+        if (!token) {
+          return Response.json({ message: 'Unauthorized: Token missing' }, { status: 401 });
+        }
+    
+        const decoded = await getTokenData(token);
+        const userId = decoded.id;
+        const userEmail = decoded.email;
     // Validate required fields
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ message: 'At least one adventure item is required' }, { status: 400 });
@@ -31,6 +40,8 @@ export async function POST(req) {
     const newBooking = await AdventureBooking.create({
       items,
       totalAmount,
+      userId,
+      userEmail,
       adventureDate: new Date(adventureDate),
       paymentStatus: 'pending',
     });

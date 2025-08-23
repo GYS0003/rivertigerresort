@@ -15,27 +15,38 @@ const adventureBookingSchema = new mongoose.Schema(
     ],
     totalAmount: { type: Number, required: true },
     adventureDate: { type: Date, required: true },
-    paymentStatus: { type: String, enum: ['pending', 'success', 'failed'], default: 'pending' },
-    
-    // Legacy payment field (you can remove this if not needed)
+    paymentStatus: {
+      type: String,
+      enum: ['pending', 'success', 'failed'],
+      default: 'pending'
+    },
     paymentId: { type: String },
-    
-    // Razorpay payment fields
     razorpay_orderId: { type: String },
     razorpay_payment_id: { type: String },
     razorpay_signature: { type: String },
-    
-    // Payment failure fields
     failureReason: { type: String },
     errorCode: { type: String },
     errorDescription: { type: String },
     failedAt: { type: Date },
-    
-    // Payment success timestamp
-    paidAt: { type: Date }
+    paidAt: { type: Date },
+    refund: {
+      approved: { type: Boolean, default: false },                 // admin toggle
+      requested: { type: Boolean, default: false },                 // user raised?
+      status: {                                                  // lifecycle
+        type: String,
+        enum: ['pending', 'approved', 'rejected', 'processed'],
+        default: 'pending',
+      },
+      amount: { type: Number, min: 0 },                      // ₹ value
+      refundPercentage: { type: Number, min: 0, max: 100 },           // e.g. 80 = 80 %
+      reason: { type: String },
+      razorpay_refund_id: String,                                    // once issued
+      requestedAt: Date,
+      processedAt: Date,
+    },
   },
   { timestamps: true }
 );
 
-export default mongoose.models.AdventureBooking ||
-  mongoose.model('AdventureBooking', adventureBookingSchema);
+export default mongoose.models.AdventureBooking
+  || mongoose.model('AdventureBooking', adventureBookingSchema);

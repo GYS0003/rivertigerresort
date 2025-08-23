@@ -26,6 +26,8 @@ export default function Footer() {
           <a href="/aboutus" className="hover:underline">About</a>
           <a href="/gallery" className="hover:underline">Gallery</a>
           <a href="/contactus" className="hover:underline">Contact Us</a>
+          <a href="/terms-conditions" className="hover:underline">Terms & Conditions</a>
+          <a href="/privacy-policy" className="hover:underline">Privacy Policy</a>
         </div>
       </div>
 

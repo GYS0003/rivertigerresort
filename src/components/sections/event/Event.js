@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Dialog } from '@headlessui/react';
+import LoginSignupModal from '../login/LoginSignupModal';
 
 const Event = () => {
   const [events, setEvents] = useState([]);
@@ -12,6 +13,7 @@ const Event = () => {
   const [eventDate, setEventDate] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
+  const [showModal, setShowModal] = useState(false);
 
   const fetchEvents = async () => {
     try {
@@ -39,7 +41,7 @@ const Event = () => {
       alert('Please select a date for the event');
       return;
     }
-
+  
     const bookingPayload = {
       items: {
         id: selectedEvent._id,
@@ -50,11 +52,12 @@ const Event = () => {
       eventDate,
       totalAmount: selectedEvent.startingPrice,
     };
-    console.log('Booking new event:', bookingPayload);
+   
     const res = fetch('/api/event/prebooking', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('token'),
       },
       body: JSON.stringify(bookingPayload),
     }).then((resp) => {
@@ -191,7 +194,13 @@ const Event = () => {
                 Cancel
               </button>
               <button
-                onClick={handleConfirmBooking}
+                onClick={()=>{
+                  if(!localStorage.getItem('token')) {
+                    setShowModal(true);
+                    return;
+                  }
+                  handleConfirmBooking();
+                }}
                 disabled={!eventDate}
                 className={`px-4 py-2 rounded-lg ${!eventDate
                   ? 'bg-gray-300 cursor-not-allowed'
@@ -204,6 +213,8 @@ const Event = () => {
           </Dialog.Panel>
         </div>
       </Dialog>
+      <LoginSignupModal isOpen={showModal} handleBooking={handleConfirmBooking}
+        onClose={() => setShowModal(false)}/>
     </div>
   );
 };

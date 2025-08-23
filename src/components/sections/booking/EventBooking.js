@@ -2,15 +2,12 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import AuthForm from './AuthForm';
-import Image from 'next/image';
 
 const EventBooking = () => {
   const [bookingData, setBookingData] = useState(null);
   const [token, setToken] = useState('');
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [paymentDetails, setPaymentDetails] = useState(null);
-  const [isOtpVerified, setIsOtpVerified] = useState(false);
   const [isPaying, setIsPaying] = useState(false);
   const [error, setError] = useState('');
   
@@ -44,7 +41,6 @@ const EventBooking = () => {
         if (!res.ok) {
           throw new Error(data.message || 'Failed to fetch booking');
         }
-        console.log('Fetched booking data:', data);
         setBookingData({
           _id: data.booking._id,
           title: data.booking.items.title,
@@ -63,7 +59,6 @@ const EventBooking = () => {
       const storedToken = localStorage.getItem('token');
       if (storedToken) {
         setToken(storedToken);
-        setIsOtpVerified(true);
       }
     };
 
@@ -372,18 +367,7 @@ const EventBooking = () => {
     );
   }
 
-  if (!isOtpVerified) {
-    return (
-      <div className="min-h-screen bg-amber-50 flex items-center justify-center p-3">
-        <AuthForm 
-          onAuthSuccess={(token) => {
-            setToken(token);
-            setIsOtpVerified(true);
-          }} 
-        />
-      </div>
-    );
-  }
+
 
   // Payment Success Screen
   if (paymentSuccess && paymentDetails && paymentDetails.booking) {

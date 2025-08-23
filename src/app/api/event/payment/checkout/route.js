@@ -7,16 +7,6 @@ export async function POST(req) {
   try {
     await connectDB();
 
-    const authHeader = req.headers.get('authorization') || '';
-    const token = authHeader.split(' ')[1];
-    if (!token) {
-      return Response.json({ message: 'Unauthorized: Token missing' }, { status: 401 });
-    }
-
-    const decoded = await getTokenData(token);
-    const userId = decoded.id;
-    const userEmail = decoded.email;
-
     const { totalAmount, bookingId } = await req.json();
 
     // Validate fields
@@ -40,8 +30,6 @@ export async function POST(req) {
       bookingId,
       {
         $set: {
-          userId,
-          userEmail,
           paymentStatus: 'pending',
           paymentId: order.id,
         },

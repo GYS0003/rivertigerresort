@@ -1,23 +1,10 @@
 import { connectDB } from '@/lib/db';
 import Razorpay from 'razorpay';
 import AdventureBooking from '@/models/AdventureBooking';
-import { getTokenData } from '@/lib/jwt';
 
 export async function POST(req) {
   try {
     await connectDB();
-
-    const authHeader = req.headers.get('authorization') || '';
-    const token = authHeader.split(' ')[1];
-
-    if (!token) {
-      return Response.json({ message: 'Unauthorized: Token missing' }, { status: 401 });
-    }
-
-    const decoded = await getTokenData(token);
-    const userId = decoded.id;
-    const userEmail = decoded.email;
-
     const { bookingId } = await req.json();
 
     // Step 1: Fetch the booking by ID
@@ -58,8 +45,6 @@ export async function POST(req) {
       bookingId,
       {
         $set: {
-          userId,
-          userEmail,
           totalAmount,
           paymentStatus: 'pending',
           paymentId: order.id,

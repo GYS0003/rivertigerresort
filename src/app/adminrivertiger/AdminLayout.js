@@ -67,6 +67,16 @@ const AdminLayout = ({ children }) => {
       icon: <FaCalendarCheck />,
       route: '/adminrivertiger/event-booking',
     },
+      {
+      name: 'Stay Refund',
+      icon: '',
+      route: '/adminrivertiger/refund-process',
+    },
+      {
+      name: 'Event Refund',
+      icon: '',
+      route: '/adminrivertiger/refund-process/event',
+    },
     {
       name: 'Contact Us',
       icon: <MdContactMail />,
