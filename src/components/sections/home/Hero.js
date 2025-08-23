@@ -115,7 +115,7 @@ export default function Hero() {
         className="object-cover object-center z-0"
       />
 
-      <div className="absolute inset-0 z-10 flex flex-col justify-center items-center px-4 py-12 md:py-22 bg-black/40">
+      <div className="absolute inset-0 z-10 flex flex-col justify-center items-center px-4 py-12 md:py-24 bg-black/40">
         {/* Heading Section */}
         <div className="text-center mb-6 md:mb-10 max-w-3xl px-4">
           <h1 className="text-amber-100 text-3xl sm:text-4xl  font-bold leading-tight md:leading-snug">

@@ -1,7 +1,23 @@
+// Your UserBooking.jsx with CancelEventModel integrated
 'use client';
 
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
+import CancelStayModel from './CancelStayModel';
+import CancelEventModel from './CancelEventModel';  // <-- new import
+
+// util — returns true if today is 3-plus days before check-in
+const canCancel = (checkIn) => {
+  if (!checkIn) return false;                 // safety
+  const msPerDay = 86_400_000;
+  const today = new Date();               // now
+  today.setHours(0, 0, 0, 0);                 // midnight
+  const checkDate = new Date(checkIn);
+  checkDate.setHours(0, 0, 0, 0);
+
+  const daysLeft = Math.ceil((checkDate - today) / msPerDay);
+  return daysLeft >= 3;                       // 3 or more days left
+};
 
 const UserBooking = () => {
   const [activeTab, setActiveTab] = useState('');
@@ -9,8 +25,14 @@ const UserBooking = () => {
   const [adventureBookings, setAdventureBookings] = useState([]);
   const [stayBookings, setStayBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [cancelModal, setCancelModal] = useState({ open: false, booking: null, type: '' });  // <-- added type
 
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : '';
+
+  function closeCancelModal(reload) {
+    setCancelModal({ open: false, booking: null, type: '' });
+    if (reload) fetchAllBookings();          // refresh list after success
+  }
 
   const fetchAllBookings = async () => {
     try {
@@ -50,8 +72,8 @@ const UserBooking = () => {
     <button
       onClick={() => setActiveTab(name)}
       className={`px-5 py-3 rounded-lg transition-all duration-300 ease-in-out flex items-center ${activeTab === name
-          ? 'bg-emerald-600 text-white shadow-lg'
-          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+        ? 'bg-emerald-600 text-white shadow-lg'
+        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
         }`}
     >
       <span className="font-medium">{label}</span>
@@ -84,8 +106,8 @@ const UserBooking = () => {
 
   const StatusBadge = ({ status }) => (
     <span className={`px-2 py-1 rounded-full text-xs font-medium ${status === 'success' || status === 'confirmed' ? 'bg-emerald-100 text-emerald-800' :
-        status === 'pending' ? 'bg-amber-100 text-amber-800' :
-          'bg-red-100 text-red-800'
+      status === 'pending' ? 'bg-amber-100 text-amber-800' :
+        'bg-red-100 text-red-800'
       }`}>
       {status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
@@ -112,29 +134,29 @@ const UserBooking = () => {
             </svg>
           </div>
           <h3 className="text-xl font-semibold text-gray-800 mb-2">No Bookings Found</h3>
-          <p className="text-gray-600 mb-6">{`You haven't made any bookings yet. Start exploring our offerings!`}</p>
+          <p className="text-gray-600 mb-4">{`You haven't made any bookings yet. Start exploring our offerings!`}</p>
           <Link href="/aboutus" className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-6 rounded-lg transition duration-300">
             Explore Activities
           </Link>
         </div>
       ) : (
         <>
-          <div className="flex flex-wrap gap-3 justify-center mb-8">
-            <Tab
+          <div className="flex flex-wrap gap-3 justify-center mb-4">
+            {stayBookings.length>0&&<Tab
               name="stays"
               label="Stays"
               count={stayBookings.length}
-            />
-            <Tab
+            />}
+            {adventureBookings.length>0&&<Tab
               name="adventures"
               label="Adventures"
               count={adventureBookings.length}
-            />
-            <Tab
+            />}
+            {eventBookings.length>0&&<Tab
               name="events"
               label="Events"
               count={eventBookings.length}
-            />
+            />}
           </div>
 
           <div className="space-y-6">
@@ -157,18 +179,47 @@ const UserBooking = () => {
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
-                          <span>Event: {formatDate(booking.eventDate, { weekday: 'long' })}</span>
+                          <span>Event: {formatDate(booking?.eventDate, { weekday: 'long' })}</span>
                         </div>
 
                         <div className="flex items-center text-gray-600">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
-                          <span>Booked on: {formatDateTime(booking.bookingDate)}</span>
+                          <span>Booked on: {formatDateTime(booking.createdAt)}</span>
+
                         </div>
                       </div>
                     </div>
                   </div>
+
+                  {booking.paymentStatus === 'success' && !booking.refund.requested &&
+                    canCancel(booking?.eventDate) && (
+                      <div className="flex items-end justify-end my-2">
+                        <button
+                          onClick={() => setCancelModal({ open: true, booking, type: 'event' })}
+                          className="w-full md:w-auto py-2 px-4 rounded-lg bg-amber-500 text-white text-sm
+                                     hover:bg-amber-600 focus:outline-none">
+                          Cancel booking
+                        </button>
+                      </div>
+                    )}
+
+                  {booking.refund.approved &&
+                    <div className="flex items-end justify-end">
+                      <p className="text-sm text-gray-600">
+                         <span className="font-medium text-green-600">Refund {booking.refund.status}</span>
+                      </p>
+                    </div>
+                  }
+
+                  {booking.refund.requested && !booking.refund.approved &&
+                    <div className="flex items-end justify-end">
+                      <p className="text-sm text-gray-600">
+                        Refund Status: <span className="font-medium text-amber-600">{booking.refund.status}</span>
+                      </p>
+                    </div>
+                  }
                 </div>
               </div>
             ))}
@@ -209,6 +260,34 @@ const UserBooking = () => {
                       </div>
                     </div>
                   </div>
+
+                  {booking.paymentStatus === 'success' && !booking.refund.requested &&
+                    canCancel(booking.adventureDate) && (
+                      <div className="flex items-end justify-end my-2">
+                        <button
+                          onClick={() => setCancelModal({ open: true, booking, type: 'adventure' })}
+                          className="w-full md:w-auto py-2 px-4 rounded-lg bg-amber-500 text-white text-sm
+                                     hover:bg-amber-600 focus:outline-none">
+                          Cancel booking
+                        </button>
+                      </div>
+                    )}
+
+                  {booking.refund.approved &&
+                    <div className="flex items-end justify-end">
+                      <p className="text-sm text-gray-600">
+                        Refund Status: <span className="font-medium text-green-600">{booking.refund.status}</span>
+                      </p>
+                    </div>
+                  }
+
+                  {booking.refund.requested && !booking.refund.approved &&
+                    <div className="flex items-end justify-end">
+                      <p className="text-sm text-gray-600">
+                        Refund Status: <span className="font-medium text-amber-600">{booking.refund.status}</span>
+                      </p>
+                    </div>
+                  }
                 </div>
               </div>
             ))}
@@ -228,7 +307,7 @@ const UserBooking = () => {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-2">
                         <div className="flex items-center text-gray-600">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -246,33 +325,78 @@ const UserBooking = () => {
                           <span>{booking.adults} Adults, {booking.children} Children</span>
                         </div>
                       </div>
+                      {/* add-ons + cancel */}
+                      <div className="grid md:grid-cols-3 gap-4">
+                        {/* add-ons take two columns on md+ */}
+                        {booking.addons?.length > 0 && (
+                          <div className="md:col-span-2 bg-gray-50 rounded-lg p-4">
+                            <h4 className="font-medium text-gray-700 mb-2">Add-ons:</h4>
+                            <ul className="space-y-2">
+                              {booking.addons.map((a) => (
+                                <li key={a.id} className="flex justify-between text-gray-600">
+                                  <span>{a.title} × {a.participants} </span>
+                                  <span className="font-medium">₹{a.totalPrice}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                      {booking.paymentStatus === 'success' && !booking.refund.requested &&
+                        canCancel(booking.checkIn) && (
+                          <div className="flex items-end justify-end my-2">
 
-                      {booking.addons?.length > 0 && (
-                        <div className="bg-gray-50 rounded-lg p-4 mt-3">
-                          <h4 className="font-medium text-gray-700 mb-2">Add-ons:</h4>
-                          <ul className="space-y-2">
-                            {booking.addons.map((addon) => (
-                              <li key={addon.id} className="flex justify-between">
-                                <span className="text-gray-600">
-                                  {addon.title} × {addon.participants}
-                                </span>
-                                {/* <span className="font-medium">₹{addon.totalPrice}</span> */}
-                              </li>
-                            ))}
-                          </ul>
+
+                            <button
+                              onClick={() => setCancelModal({ open: true, booking, type: 'stay' })}
+                              className="w-full py-2 px-4 rounded-lg bg-amber-500 text-white text-sm
+                 hover:bg-amber-600 focus:outline-none">
+                              Cancel booking
+                            </button>
+                          </div>
+                        )}
+                      {booking.refund.approved &&
+                        <div className="flex items-end justify-end">
+                          <p className="text-sm text-gray-600">
+                            <span className="font-medium text-green-600">Refund {booking.refund.status}</span>
+                          </p>
                         </div>
-                      )}
+                      }
+                      {booking.refund.requested && !booking.refund.approved &&
+                        <div className="flex items-end justify-end">
+                          <p className="text-sm text-gray-600">
+                            <span className="font-medium text-amber-600">Refund {booking.refund.status}</span>
+                          </p>
+                        </div>
+                      }
                     </div>
                   </div>
-
                 </div>
               </div>
             ))}
           </div>
         </>
-      )}
-    </div>
+      )
+      }
+      <CancelStayModel
+        isOpen={cancelModal.open && cancelModal.type === 'stay'}
+        booking={cancelModal.booking}
+        onClose={closeCancelModal}
+      />
+      <CancelEventModel
+        isOpen={cancelModal.open && cancelModal.type === 'event'}
+        booking={cancelModal.booking}
+        onClose={closeCancelModal}
+      />
+      {/* <CancelAdventureModel
+        isOpen={cancelModal.open && cancelModal.type === 'adventure'}
+        booking={cancelModal.booking}
+        onClose={closeCancelModal}
+      /> */}
+
+    </div >
   );
 };
 
-export default UserBooking;
+
+export default UserBooking; 

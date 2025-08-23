@@ -3,7 +3,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import AuthForm from './AuthForm';
 
 const Booking = () => {
   const [bookingData, setBookingData] = useState(null);
@@ -12,7 +11,6 @@ const Booking = () => {
   const [bookingId, setBookingId] = useState('');
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [paymentDetails, setPaymentDetails] = useState(null);
-  const [isOtpVerified, setIsOtpVerified] = useState(false);
   
   // New states for loading and failure
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
@@ -52,7 +50,6 @@ const Booking = () => {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
       setToken(storedToken);
-      setIsOtpVerified(true);
     }
   }, []);
 
@@ -225,11 +222,7 @@ const Booking = () => {
     }
   };
 
-  const handleAuthSuccess = (newToken) => {
-    setToken(newToken);
-    localStorage.setItem('token', newToken);
-    setIsOtpVerified(true);
-  };
+  
 
   const handlePrint = () => {
     window.print();
@@ -485,9 +478,7 @@ const Booking = () => {
   return (
     <>
       <div className="max-w-xl mx-auto p-3">
-        {!isOtpVerified ? (
-          <AuthForm onAuthSuccess={handleAuthSuccess} />
-        ) : (
+       
           <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
             {/* Header */}
             <div className="bg-green-900 text-white p-3">
@@ -558,7 +549,7 @@ const Booking = () => {
               </button>
             </div>
           </div>
-        )}
+        
 
         {error && (
           <div className="mt-3 p-2.5 bg-red-50 border border-red-200 rounded-lg">

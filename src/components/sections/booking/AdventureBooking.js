@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import AuthForm from './AuthForm';
 
 const AdventureBooking = () => {
   const [bookingData, setBookingData] = useState(null);
@@ -10,7 +9,6 @@ const AdventureBooking = () => {
   const [error, setError] = useState('');
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [paymentDetails, setPaymentDetails] = useState(null);
-  const [isOtpVerified, setIsOtpVerified] = useState(false);
 
   // New states for payment processing popups
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
@@ -26,7 +24,6 @@ const AdventureBooking = () => {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
       setToken(storedToken);
-      setIsOtpVerified(true);
     }
 
     // Fetch booking data from API
@@ -44,10 +41,10 @@ const AdventureBooking = () => {
       }
     };
 
-    if (bookingId && isOtpVerified) {
+    if (bookingId) {
       fetchBooking();
     }
-  }, [isOtpVerified]);
+  }, []);
 
   const loadRazorpayScript = () => {
     return new Promise((resolve) => {
@@ -200,11 +197,7 @@ const AdventureBooking = () => {
     }
   };
 
-  const handleAuthSuccess = (newToken) => {
-    setToken(newToken);
-    localStorage.setItem('token', newToken);
-    setIsOtpVerified(true);
-  };
+ 
 
   // Comprehensive Payment Success Page
   if (paymentSuccess && paymentDetails) {
@@ -411,9 +404,6 @@ const AdventureBooking = () => {
     );
   }
 
-  if (!isOtpVerified) {
-    return <AuthForm onAuthSuccess={handleAuthSuccess} />;
-  }
 
   if (!bookingData) {
     return <div className="text-center p-8">Loading adventure details...</div>;

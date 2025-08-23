@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
+import LoginSignupModal from '../login/LoginSignupModal';
 
 const DetailMain = () => {
     const router = useRouter();
@@ -54,6 +55,7 @@ const DetailMain = () => {
     const [showAddonModal, setShowAddonModal] = useState(false);
     const [activeAddon, setActiveAddon] = useState(null);
     const [modalCount, setModalCount] = useState(1);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const openAddonModal = (addon) => {
         setActiveAddon(addon);
@@ -146,7 +148,10 @@ const DetailMain = () => {
 
     const res = await fetch('/api/stay/prebooking', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+    },
       body: JSON.stringify(bookingData),
     });
 
@@ -440,7 +445,14 @@ const DetailMain = () => {
                             </p>
                         </div>
                         <button
-                            onClick={handleBookNow}
+                            onClick={()=>{
+                                if(!localStorage.getItem('token')){
+                                    setIsModalOpen(true);
+                                    return;
+                                }
+
+                                handleBookNow();
+                            }}
                             className="w-full sm:w-auto bg-green-700 text-white px-4 sm:px-6 py-2 rounded-lg font-bold hover:bg-green-800 transition text-sm sm:text-base"
                         >
                             Book Now
@@ -485,10 +497,11 @@ const DetailMain = () => {
                                 Add
                             </button>
                         </div>
-
                     </div>
                 </div>
             )}
+            <LoginSignupModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} handleBooking={handleBookNow} />
+
         </>
     );
 };

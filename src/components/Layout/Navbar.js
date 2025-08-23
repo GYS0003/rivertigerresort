@@ -26,8 +26,8 @@ const Navbar = () => {
 
   // Helper function to determine if a link is active
   const isActiveLink = (href) => {
-    return pathname === href || 
-           (href !== '/' && pathname.startsWith(href));
+    return pathname === href ||
+      (href !== '/' && pathname.startsWith(href));
   };
 
   // Navigation items
@@ -40,16 +40,15 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed w-full z-50 transition-all duration-300 ${
-        scrolled ? 'bg-amber-100 shadow-lg py-2' : 'bg-transparent py-4'
-      }`}
+      className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-amber-100 shadow-lg py-2' : 'bg-transparent py-4'
+        }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
-              <div className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden bg-white">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden bg-white">
                 <Image
                   src="/Home/icon.jpeg"
                   alt="River Tiger Resort Logo"
@@ -62,19 +61,17 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            <div className="flex space-x-8">
+          <div className="hidden md:flex items-baseline justify-center space-x-8">
+            <div className="flex space-x-8 ">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`font-medium transition-colors relative ${
-                    scrolled ? 'text-gray-700' : 'text-white'
-                  } ${
-                    isActiveLink(item.href) 
+                  className={`font-medium transition-colors relative ${scrolled ? 'text-gray-700' : 'text-white'
+                    } ${isActiveLink(item.href)
                       ? 'text-amber-600 font-semibold'
                       : 'hover:text-amber-600'
-                  }`}
+                    }`}
                 >
                   {item.label}
                   {isActiveLink(item.href) && (
@@ -82,23 +79,25 @@ const Navbar = () => {
                   )}
                 </Link>
               ))}
-              
+
               {/* Conditionally show My Bookings */}
-              {isAuthenticated && (
+              {isAuthenticated ? (
                 <Link
                   href="/my-bookings"
-                  className={`font-medium transition-colors relative ${
-                    scrolled ? 'text-gray-700' : 'text-white'
-                  } ${
-                    isActiveLink('/my-bookings') 
+                  className={`font-medium transition-colors relative ${scrolled ? 'text-gray-700' : 'text-white'
+                    } ${isActiveLink('/my-bookings')
                       ? 'text-amber-600 font-semibold'
                       : 'hover:text-amber-600'
-                  }`}
+                    }`}
                 >
                   My Bookings
                   {isActiveLink('/my-bookings') && (
                     <span className="absolute bottom-0 left-0 w-full h-0.5 bg-amber-600"></span>
                   )}
+                </Link>
+              ) : (
+                <Link href="/login" className='rounded-lg  text-orange-500  font-bold  '>
+                  LogIn
                 </Link>
               )}
             </div>
@@ -127,38 +126,39 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       <div
-        className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${
-          isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-        }`}
+        className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+          }`}
       >
         <div className={`px-4 pt-2 pb-4 space-y-1 ${scrolled ? 'bg-white' : 'bg-gray-800'}`}>
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                scrolled 
+              className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${scrolled
                   ? `${isActiveLink(item.href) ? 'bg-amber-100 text-amber-700' : 'text-gray-700 hover:bg-gray-100'}`
                   : `${isActiveLink(item.href) ? 'bg-gray-700' : 'text-white hover:bg-gray-700'}`
-              }`}
+                }`}
               onClick={() => setIsMenuOpen(false)}
             >
               {item.label}
             </Link>
           ))}
-          
+
           {/* Conditionally show My Bookings in mobile menu */}
-          {isAuthenticated && (
+          {isAuthenticated ? (
             <Link
               href="/my-bookings"
-              className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                scrolled 
+              className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${scrolled
                   ? `${isActiveLink('/my-bookings') ? 'bg-amber-100 text-amber-700' : 'text-gray-700 hover:bg-gray-100'}`
                   : `${isActiveLink('/my-bookings') ? 'bg-gray-700' : 'text-white hover:bg-gray-700'}`
-              }`}
+                }`}
               onClick={() => setIsMenuOpen(false)}
             >
               My Bookings
+            </Link>
+          ) : (
+            <Link href="/login" className='rounded-lg px-2 py-2 mt-4 mx-2 bg-orange-300 font-bold text-sm border-orange-600'>
+              Login
             </Link>
           )}
         </div>

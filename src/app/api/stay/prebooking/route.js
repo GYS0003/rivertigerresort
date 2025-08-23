@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import Booking from '@/models/Booking';
 import { connectDB } from '@/lib/db'; // Your DB connection utility
 import Stay from '@/models/Stay';
+import { getTokenData } from '@/lib/jwt';
 
 
 
@@ -27,10 +28,18 @@ export async function POST(req) {
       addons = [],
       adults,
       children,
-      userId,
-      userEmail,
       phone,
     } = body;
+
+    const authHeader = req.headers.get('authorization') || '';
+    const token = authHeader.split(' ')[1];
+    if (!token) {
+      return Response.json({ message: 'Unauthorized: Token missing' }, { status: 401 });
+    }
+
+    const decoded = await getTokenData(token);
+    const userId = decoded.id;
+    const userEmail = decoded.email;
 
     // Validation
     if (!stayId || !stayName || !checkIn || !checkOut || adults == null || children == null) {
@@ -77,7 +86,7 @@ export async function POST(req) {
       numNights,
       adults,
       children,
-      userId: userId ? new mongoose.Types.ObjectId(userId) : undefined,
+      userId,
       userEmail,
       phone,
       paymentStatus: 'pending',

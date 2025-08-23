@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import EventBooking from '@/models/EventBooking';
+import { getTokenData } from '@/lib/jwt';
 
 // Create a new event booking
 export async function POST(req) {
@@ -9,11 +10,19 @@ export async function POST(req) {
     const body = await req.json();
 
     const {
-      items,         // Object with id, title, price, total
+      items,
       eventDate,
       totalAmount,
     } = body;
+    const authHeader = req.headers.get('authorization') || '';
+    const token = authHeader.split(' ')[1];
+    if (!token) {
+      return Response.json({ message: 'Unauthorized: Token missing' }, { status: 401 });
+    }
 
+    const decoded = await getTokenData(token);
+    const userId = decoded.id;
+    const userEmail = decoded.email;
 
     if (!items || !items.id || !items.title || !items.price || !items.total) {
       return NextResponse.json({ message: 'Incomplete event item details' }, { status: 400 });
@@ -23,11 +32,12 @@ export async function POST(req) {
       return NextResponse.json({ message: 'Event date and total amount are required' }, { status: 400 });
     }
 
-    // Create booking
     const newBooking = await EventBooking.create({
       items,
       eventDate: new Date(eventDate),
       totalAmount,
+      userId,
+      userEmail,
       paymentStatus: 'pending',
     });
 

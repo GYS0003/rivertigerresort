@@ -9,6 +9,7 @@ import { FaPlus, FaMinus, FaEdit, FaTrash, FaCalendarAlt, FaUsers } from "react-
 import { HiOutlineLocationMarker, HiOutlineClock } from "react-icons/hi";
 import Link from 'next/link';
 import { Fragment } from 'react';
+import LoginSignupModal from '../login/LoginSignupModal';
 
 const Adventure = () => {
     const [adventures, setAdventures] = useState([]);
@@ -20,6 +21,7 @@ const Adventure = () => {
     const [adventureDate, setAdventureDate] = useState('');
     const [showDateModal, setShowDateModal] = useState(false);
     const router = useRouter();
+    const [showModal, setShowModal] = useState(false);
 
     const fetchAdventures = async () => {
         try {
@@ -95,7 +97,8 @@ const Adventure = () => {
             const response = await fetch('/api/adventure/prebooking', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
                 body: JSON.stringify(payload)
             });
@@ -109,7 +112,6 @@ const Adventure = () => {
                 throw new Error(result.message || 'Booking failed');
             }
         } catch (error) {
-            console.error('Booking error:', error);
             alert(`Booking failed: ${error.message}`);
         } finally {
             setShowDateModal(false);
@@ -492,7 +494,13 @@ const Adventure = () => {
                                                 Cancel
                                             </button>
                                             <button
-                                                onClick={handleConfirmDate}
+                                                onClick={()=>{
+                                                    if(!localStorage.getItem('token')){
+                                                        setShowModal(true)
+                                                        return;
+                                                    }
+                                                    handleConfirmDate()
+                                                }}
                                                 disabled={!adventureDate}
                                                 className="flex-1 bg-green-900 hover:bg-green-800 disabled:bg-gray-400 text-white font-medium py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-[1.02] disabled:scale-100 text-sm"
                                             >
@@ -506,6 +514,8 @@ const Adventure = () => {
                     </div>
                 </Dialog>
             </Transition>
+            <LoginSignupModal isOpen={showModal} onClose={() => setShowModal(false)} handleBooking={handleConfirmDate} />
+
         </div>
     );
 };
