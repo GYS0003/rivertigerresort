@@ -25,13 +25,13 @@ const TermsandConditions = () => {
             </h2>
             <div className="text-gray-300 space-y-4 leading-relaxed">
               <p>
-                For the purpose of these Terms and Conditions, the term <strong className="text-white">"we"</strong>, <strong className="text-white">"us"</strong>, <strong className="text-white">"our"</strong> used anywhere on this page shall mean <strong className="text-cyan-400">River Tiger Resort</strong>, whose registered/operational office is located at:
+                {`For the purpose of these Terms and Conditions, the term`} <strong className="text-white">{"we"}</strong>{","} <strong className="text-white">{"us"}</strong>{`, `}<strong className="text-white">{"our"}</strong> used anywhere on this page shall mean <strong className="text-cyan-400">River Tiger Resort</strong>{`, whose registered/operational office is located at:`}
               </p>
               <div className="bg-white/5 p-4 rounded-lg border-l-4 border-cyan-400">
-                <p className="font-medium">SAWARA, CHAKARATA 248123<br />Tungra BO 248123, India</p>
+                <p className="font-medium">{`SAWARA, CHAKARATA 248123`}<br />{`Tungra BO 248123, India`}</p>
               </div>
               <p>
-                The terms <strong className="text-white">"you"</strong>, <strong className="text-white">"your"</strong>, <strong className="text-white">"user"</strong>, <strong className="text-white">"visitor"</strong> shall mean any natural or legal person who is visiting our website and/or agreed to purchase from us.
+                The terms <strong className="text-white">{`"you"`}</strong>, <strong className="text-white">{`"your"`}</strong>, <strong className="text-white">{`"user"`}</strong>, <strong className="text-white">{`"visitor"`}</strong> shall mean any natural or legal person who is visiting our website and/or agreed to purchase from us.
               </p>
             </div>
           </section>
@@ -74,7 +74,7 @@ const TermsandConditions = () => {
             </h2>
             <div className="text-gray-300 space-y-4 leading-relaxed">
               <p>
-                Our website contains material which is owned by or licensed to us. This material includes, but is not limited to, the design, layout, look, appearance, graphics, photographs, and content.
+               {` Our website contains material which is owned by or licensed to us. This material includes, but is not limited to, the design, layout, look, appearance, graphics, photographs, and content.`}
               </p>
               <div className="bg-yellow-500/10 border border-yellow-500/30 p-4 rounded-lg">
                 <p className="text-yellow-300">
@@ -188,7 +188,7 @@ const TermsandConditions = () => {
             </h2>
             <div className="text-gray-300 space-y-4 leading-relaxed">
               <p>
-                You may not create a link to our website from another website or document without River Tiger Resort's prior written consent.
+                {`You may not create a link to our website from another website or document without River Tiger Resort's prior written consent.`}
               </p>
               <div className="bg-indigo-500/10 border border-indigo-500/30 p-4 rounded-lg">
                 <p className="text-indigo-300">
