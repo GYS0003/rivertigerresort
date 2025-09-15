@@ -22,6 +22,18 @@ const staySchema = new mongoose.Schema({
   amenities: [String],
   images: [String],
   specialNotes: String,
+  breakfastPrice: {
+    type: Number,
+    required: false,
+  },
+  lunchPrice: {
+    type: Number,
+    required: false,
+  },
+  dinnerPrice: {
+    type: Number,
+    required: false,
+  },
 }, { timestamps: true });
 
 export default mongoose.models.Stay || mongoose.model('Stay', staySchema);

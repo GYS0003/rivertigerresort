@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
-import LoginSignupModal from '../login/LoginSignupModal';
+import LoginSignupModal from '@/components/sections/login/LoginSignupModal';
 
 const DetailMain = () => {
     const router = useRouter();
@@ -13,6 +13,11 @@ const DetailMain = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedAddons, setSelectedAddons] = useState({});
+    const [selectedMeals, setSelectedMeals] = useState({
+        breakfast: false,
+        lunch: false,
+        dinner: false
+    });
     const [totalPrice, setTotalPrice] = useState(0);
     const [numNights, setNumNights] = useState(1);
     const [adventuresLoading, setAdventuresLoading] = useState(true);
@@ -22,16 +27,32 @@ const DetailMain = () => {
     const [showAllAdventures, setShowAllAdventures] = useState(false);
     const [checkInDate, setCheckInDate] = useState(null);
     const [checkOutDate, setCheckOutDate] = useState(null);
+
     // Calculate total price whenever components change
     useEffect(() => {
         let calculatedTotal = stayPrice * numNights;
 
+        // Add addons
         Object.values(selectedAddons).forEach(addon => {
             calculatedTotal += addon.pricePerPerson * addon.participants;
         });
 
+        // Add meals (per person per night)
+        if (stay) {
+            const totalGuests = noAdults + noChildren;
+            if (selectedMeals.breakfast && stay.breakfastPrice) {
+                calculatedTotal += stay.breakfastPrice * totalGuests * numNights;
+            }
+            if (selectedMeals.lunch && stay.lunchPrice) {
+                calculatedTotal += stay.lunchPrice * totalGuests * numNights;
+            }
+            if (selectedMeals.dinner && stay.dinnerPrice) {
+                calculatedTotal += stay.dinnerPrice * totalGuests * numNights;
+            }
+        }
+
         setTotalPrice(calculatedTotal);
-    }, [stayPrice, numNights, selectedAddons]);
+    }, [stayPrice, numNights, selectedAddons, selectedMeals, stay, noAdults, noChildren]);
 
     // Booking details from localStorage
     useEffect(() => {
@@ -72,7 +93,6 @@ const DetailMain = () => {
     const handleModalAdd = () => {
         if (activeAddon) {
             const count = parseInt(modalCount) || 0;
-            // Ensure count does not exceed max
             const maxCount = activeAddon.maxParticipants || 0;
             const finalCount = Math.max(0, Math.min(count, maxCount));
             if (finalCount > 0) {
@@ -94,7 +114,7 @@ const DetailMain = () => {
                 if (!stayResponse.ok) throw new Error('Failed to fetch stay details');
                 const stayData = await stayResponse.json();
                 setStay(stayData);
-                setStayPrice(stayData.price); // Set stay price per night
+                setStayPrice(stayData.price);
 
                 // Fetch adventures
                 const adventuresResponse = await fetch('/api/adventure');
@@ -121,52 +141,58 @@ const DetailMain = () => {
         }));
     };
 
- const handleBookNow = async () => {
-  try {
-    const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
-    
-    const bookingData = {
-      stayId: id,
-      stayName: stay?.name,
-      adults: noAdults,
-      children: noChildren,
-      checkIn: checkInDate.toISOString(),
-      checkOut: checkOutDate.toISOString(),
-      addons: Object.values(selectedAddons)
-        .filter(a => a.participants > 0)
-        .map(a => ({
-          id: a.id,
-          title: a.title,
-          description: a.description,
-          pricePerPerson: a.pricePerPerson,
-          participants: a.participants,
-        })),
-      userId: userInfo._id,
-      userEmail: userInfo.email,
-      phone: userInfo.phone,
+    const handleMealToggle = (mealType) => {
+        setSelectedMeals(prev => ({
+            ...prev,
+            [mealType]: !prev[mealType]
+        }));
     };
 
-    const res = await fetch('/api/stay/prebooking', {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-    },
-      body: JSON.stringify(bookingData),
-    });
+    const handleBookNow = async () => {
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
 
-    if (res.ok) {
-      const data = await res.json();
-      router.push(`/booking/${data.booking._id}`);
-    } else {
-      console.error('Booking failed:', await res.json());
-    }
-  } catch (error) {
-    console.error('Booking error:', error);
-  }
-};
+            const bookingData = {
+                stayId: id,
+                stayName: stay?.name,
+                adults: noAdults,
+                children: noChildren,
+                checkIn: checkInDate.toISOString(),
+                checkOut: checkOutDate.toISOString(),
+                addons: Object.values(selectedAddons)
+                    .filter(a => a.participants > 0)
+                    .map(a => ({
+                        id: a.id,
+                        title: a.title,
+                        description: a.description,
+                        pricePerPerson: a.pricePerPerson,
+                        participants: a.participants,
+                    })),
+                selectedMeals,
+                userId: userInfo._id,
+                userEmail: userInfo.email,
+                phone: userInfo.phone,
+            };
 
+            const res = await fetch('/api/stay/prebooking', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                },
+                body: JSON.stringify(bookingData),
+            });
 
+            if (res.ok) {
+                const data = await res.json();
+                router.push(`/booking/${data.booking._id}`);
+            } else {
+                console.error('Booking failed:', await res.json());
+            }
+        } catch (error) {
+            console.error('Booking error:', error);
+        }
+    };
 
     const getDefaultImage = (category) => {
         switch (category) {
@@ -215,88 +241,178 @@ const DetailMain = () => {
         ? stay.images[0]
         : getDefaultImage(stay.category);
 
+    const totalGuests = noAdults + noChildren;
+
     return (
         <>
-            <div className="max-w-4xl mx-auto  sm:px-4 py-4 text-[#1f3c2e]">
+            <div className="max-w-4xl mx-auto sm:px-4 py-4 text-[#1f3c2e]">
                 {/* Breadcrumb */}
                 <div className='p-2'>
-                <div className="mb-4 text-xs sm:text-sm text-gray-600">
-                    <button onClick={() => router.back()} className="text-green-700 hover:underline">
-                        ← Back to Accommodations
-                    </button>
-                </div>
+                    <div className="mb-4 text-xs sm:text-sm text-gray-600">
+                        <button onClick={() => router.back()} className="text-green-700 hover:underline">
+                            ← Back to Accommodations
+                        </button>
+                    </div>
 
-                {/* Stay Header */}
-                <div className="text-center mb-4">
-                    <h1 className="text-xl sm:text-2xl font-bold text-green-900">{stay.name}</h1>
-                    <div className="mt-1">
-                        <div className="bg-green-700 text-white px-2 py-1 rounded-full text-xs font-medium inline-block">
-                            {stay.category.charAt(0).toUpperCase() + stay.category.slice(1)}
+                    {/* Stay Header */}
+                    <div className="text-center mb-4">
+                        <h1 className="text-xl sm:text-2xl font-bold text-green-900">{stay.name}</h1>
+                        <div className="mt-1">
+                            <div className="bg-green-700 text-white px-2 py-1 rounded-full text-xs font-medium inline-block">
+                                {stay.category.charAt(0).toUpperCase() + stay.category.slice(1)}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Guest Info */}
+                    <div className="bg-green-50 p-3 rounded-lg mb-4">
+                        <h2 className="text-sm sm:text-base font-semibold text-green-800 mb-2">Your Booking Details</h2>
+                        <div className="flex text-xs sm:text-sm">
+                            <div className="mr-2">
+                                <span className="font-medium">Adults:</span> {noAdults}
+                            </div>
+                            <div className="mr-2">
+                                <span className="font-medium">Children:</span> {noChildren}
+                            </div>
+                            <div>
+                                <span className="font-medium">Total Days:</span> {numNights}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Main Image */}
+                    {mainImage && (
+                        <div className="relative w-full h-40 sm:h-52 md:h-64 rounded-lg overflow-hidden shadow-md mb-4">
+                            <Image
+                                src={mainImage}
+                                alt={stay.name}
+                                fill
+                                className="object-cover rounded-t-xl"
+                                priority
+                            />
+                        </div>
+                    )}
+
+                    {/* Stay Info */}
+                    <div className="mb-3">
+                        <h2 className="text-sm sm:text-base font-semibold text-green-800 mb-2">Description</h2>
+                        <p className="text-xs sm:text-sm text-gray-700 mb-3">{stay.description}</p>
+                        <h2 className="text-sm sm:text-base font-semibold text-green-800 mb-2">{`What's Included`}</h2>
+                        <ul className="space-y-1 mb-3">
+                            {stay.specialNotes && (
+                                <li className="flex items-start">
+                                    <svg className="h-4 w-4 text-green-700 mr-1 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span className="text-xs sm:text-sm">{stay.specialNotes}</span>
+                                </li>
+                            )}
+                        </ul>
+                    </div>
+
+                    {/* Amenities */}
+                    <div className="py-2 mb-4">
+                        <h2 className="text-sm sm:text-base font-semibold text-green-800 mb-2">Amenities</h2>
+                        <div className="flex flex-wrap gap-1">
+                            {stay.amenities.map((amenity, index) => (
+                                <div key={index} className="flex items-center bg-green-800 px-2 py-1 rounded text-xs sm:text-sm">
+                                    <span className="text-gray-100">{amenity}</span>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>
 
-                {/* Guest Info */}
-                <div className="bg-green-50 p-3 rounded-lg mb-4">
-                    <h2 className="text-sm sm:text-base font-semibold text-green-800 mb-2">Your Booking Details</h2>
-                    <div className="flex text-xs sm:text-sm">
-                        <div className="mr-2">
-                            <span className="font-medium">Adults:</span> {noAdults}
-                        </div >
-                        <div className="mr-2">
-                            <span className="font-medium">Children:</span> {noChildren}
-                        </div>
-                        <div>
-                            <span className="font-medium">Total Days:</span> {numNights}
-                        </div>
-                    </div>
-                </div>
+                {/* Meals Section */}
+                {(stay.breakfastPrice > 0 || stay.lunchPrice > 0 || stay.dinnerPrice > 0) && (
+                    <div className="p-2 sm:p-3 bg-blue-50 rounded-lg shadow-sm mb-4">
+                        <h2 className="text-lg sm:text-xl font-bold text-center mb-3 sm:mb-4 text-green-900">
+                            Meal Options
+                        </h2>
 
-                {/* Main Image */}
-                {mainImage && (
-                    <div className="relative w-full h-40 sm:h-52 md:h-64 rounded-lg overflow-hidden shadow-md mb-4">
-                        <Image
-                            src={mainImage}
-                            alt={stay.name}
-                            fill
-                            className="object-cover rounded-t-xl"
-                            priority
-                        />
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+                            {stay.breakfastPrice > 0 && (
+                                <div className="border border-blue-200 rounded-lg p-3 bg-gradient-to-r from-blue-50 to-white shadow-sm">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h3 className="font-bold text-sm sm:text-base text-green-900">Breakfast</h3>
+                                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
+                                            ₹{stay.breakfastPrice}/person
+                                        </span>
+                                           <button
+                                            onClick={() => handleMealToggle('breakfast')}
+                                            className={`px-3 py-1 rounded-lg font-medium transition text-xs ${selectedMeals.breakfast
+                                                    ? 'bg-green-700 text-white hover:bg-green-800'
+                                                    : 'bg-green-900 text-white hover:bg-green-600'
+                                                }`}
+                                        >
+                                            {selectedMeals.breakfast ? 'Added' : 'Add'}
+                                        </button>
+                                    </div>
+
+                                    {selectedMeals.breakfast && (
+                                        <div className="mt-2 pt-2 flex justify-between border-t text-xs">
+                                            <div className="text-gray-500">({totalGuests} guests × {numNights} nights)</div>
+                                            <div className="text-gray-600">Total: ₹{stay.breakfastPrice * totalGuests * numNights}</div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {stay.lunchPrice > 0 && (
+                                <div className="border border-blue-200 rounded-lg p-3 bg-gradient-to-r from-blue-50 to-white shadow-sm">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h3 className="font-bold text-sm sm:text-base text-green-900">Lunch</h3>
+                                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
+                                            ₹{stay.lunchPrice}/person
+                                        </span>
+                                        <button
+                                            onClick={() => handleMealToggle('lunch')}
+                                            className={`px-3 py-1 rounded-lg font-medium transition text-xs ${selectedMeals.lunch
+                                                    ? 'bg-green-700 text-white hover:bg-green-800'
+                                                    : 'bg-green-900 text-white hover:bg-green-700'
+                                                }`}
+                                        >
+                                            {selectedMeals.lunch ? 'Added' : 'Add'}
+                                        </button>
+                                    </div>
+
+                                    {selectedMeals.lunch && (
+                                        <div className="mt-2 pt-2 flex justify-between border-t text-xs">
+                                            <div className="text-gray-500">({totalGuests} guests × {numNights} nights)</div>
+                                            <div className="text-gray-900 font-semibold">Total: ₹{stay.lunchPrice * totalGuests * numNights}</div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {stay.dinnerPrice > 0 && (
+                                <div className="border border-blue-200 rounded-lg p-3 bg-gradient-to-r from-blue-50 to-white shadow-sm">
+                                    <div className="flex  items-center justify-between mb-2">
+                                        <h3 className="font-bold text-sm sm:text-base text-green-900">Dinner</h3>
+                                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
+                                            ₹{stay.dinnerPrice}/person
+                                        </span>
+                                        <button
+                                            onClick={() => handleMealToggle('dinner')}
+                                            className={`px-3 py-1 rounded-lg font-medium transition text-xs ${selectedMeals.dinner
+                                                    ? 'bg-green-700 text-white hover:bg-green-800'
+                                                    : 'bg-green-900 text-white hover:bg-green-700'
+                                                }`}
+                                        >
+                                            {selectedMeals.dinner ? 'Added' : 'Add'}
+                                        </button>
+                                    </div>
+                                    {selectedMeals.dinner && (
+                                        <div className="mt-2 pt-2 flex justify-between border-t text-xs">
+                                            <div className="text-gray-500">({totalGuests} guests × {numNights} nights)</div>
+                                            <div className="text-gray-800 font-semibold">Total: ₹{stay.dinnerPrice * totalGuests * numNights}</div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
-
-                {/* Stay Info */}
-                <div className="mb-3">
-                    <h2 className="text-sm sm:text-base font-semibold text-green-800 mb-2">Description</h2>
-                    <p className="text-xs sm:text-sm text-gray-700 mb-3">{stay.description}</p>
-
-                    <h2 className="text-sm sm:text-base font-semibold text-green-800 mb-2">{`What's Included`}</h2>
-                    <ul className="space-y-1 mb-3">
-                        {stay.specialNotes && (
-                            <li className="flex items-start">
-                                <svg className="h-4 w-4 text-green-700 mr-1 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
-                                <span className="text-xs sm:text-sm">{stay.specialNotes}</span>
-                            </li>
-                        )}
-                    </ul>
-                </div>
-
-                {/* Amenities */}
-                <div className="py-2 mb-4">
-                    <h2 className="text-sm sm:text-base font-semibold text-green-800 mb-2">Amenities</h2>
-                    <div className="flex flex-wrap gap-1">
-                        {stay.amenities.map((amenity, index) => (
-                            <div key={index} className="flex items-center bg-green-800 px-2 py-1 rounded text-xs sm:text-sm">
-                                <span className="text-gray-100">{amenity}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-</div>
-
 
                 {/* Add-ons */}
                 <div className="p-2 sm:p-3 bg-amber-100 rounded-t-lg shadow-sm">
@@ -317,13 +433,10 @@ const DetailMain = () => {
                             {adventures.slice(0, showAllAdventures ? adventures.length : 2).map((adventure) => {
                                 const currentCount = selectedAddons[adventure._id]?.participants || 0;
 
-                                // Calculate max participants based on activity restrictions
                                 let maxParticipants;
                                 if (adventure.ageRestricted) {
-                                    // For 18+ activities, max is number of adults
                                     maxParticipants = Math.min(adventure.maxPeople || 100, noAdults);
                                 } else {
-                                    // For all ages, max is total guests
                                     maxParticipants = Math.min(adventure.maxPeople || 100, noAdults + noChildren);
                                 }
 
@@ -396,7 +509,7 @@ const DetailMain = () => {
                         </div>
                     )}
                     {adventures.length > 2 && (
-                        <div className="mt-2  flex justify-center">
+                        <div className="mt-2 flex justify-center">
                             <button
                                 className="bg-green-700 text-xs text-white px-4 py-1 rounded-lg font-medium hover:bg-green-800 transition"
                                 onClick={() => setShowAllAdventures(!showAllAdventures)}
@@ -408,58 +521,84 @@ const DetailMain = () => {
                 </div>
 
                 {/* Price Breakdown */}
-            <div className=" p-4 fixed md:static  bottom-0 w-full bg-white border-2 border-amber-100  rounded-b-lg">
-                <h3 className="text-sm sm:text-base font-semibold text-green-800 mb-2">Price Breakdown</h3>
-                <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                        <span>Stay Price ({stayPrice} × {numNights} nights):</span>
-                        <span className="font-medium">₹{stayPrice * numNights}</span>
+                <div className="p-4 fixed md:static bottom-0 w-full bg-white border-2 border-amber-100 rounded-b-lg">
+                    <h3 className="text-sm sm:text-base font-semibold text-green-800 mb-2">Price Breakdown</h3>
+                    <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                            <span>Stay Price ({stayPrice} × {numNights} nights):</span>
+                            <span className="font-medium">₹{stayPrice * numNights}</span>
+                        </div>
+
+                        {/* Meal pricing breakdown */}
+                        {(selectedMeals.breakfast || selectedMeals.lunch || selectedMeals.dinner) && (
+                            <div>
+                                <h4 className="text-sm font-medium mb-1">Meals:</h4>
+                                <ul className="space-y-1">
+                                    {selectedMeals.breakfast && stay.breakfastPrice > 0 && (
+                                        <li className="flex justify-between text-xs">
+                                            <span>Breakfast ({totalGuests} guests × {numNights} nights):</span>
+                                            <span>₹{stay.breakfastPrice * totalGuests * numNights}</span>
+                                        </li>
+                                    )}
+                                    {selectedMeals.lunch && stay.lunchPrice > 0 && (
+                                        <li className="flex justify-between text-xs">
+                                            <span>Lunch ({totalGuests} guests × {numNights} nights):</span>
+                                            <span>₹{stay.lunchPrice * totalGuests * numNights}</span>
+                                        </li>
+                                    )}
+                                    {selectedMeals.dinner && stay.dinnerPrice > 0 && (
+                                        <li className="flex justify-between text-xs">
+                                            <span>Dinner ({totalGuests} guests × {numNights} nights):</span>
+                                            <span>₹{stay.dinnerPrice * totalGuests * numNights}</span>
+                                        </li>
+                                    )}
+                                </ul>
+                            </div>
+                        )}
+
+                        {Object.values(selectedAddons).length > 0 && (
+                            <div>
+                                <h4 className="text-sm font-medium mb-1">Add-ons:</h4>
+                                <ul className="space-y-1">
+                                    {Object.values(selectedAddons).map((addon, index) => (
+                                        <li key={index} className="flex justify-between text-xs">
+                                            <span>{addon.title} (x{addon.participants}):</span>
+                                            <span>₹{addon.pricePerPerson * addon.participants}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
+                        <div className="flex justify-between border-t pt-2 mt-2">
+                            <span className="font-medium">Total:</span>
+                            <span className="font-bold text-lg">₹{totalPrice}</span>
+                        </div>
                     </div>
 
-                    {Object.values(selectedAddons).length > 0 && (
-                        <div>
-                            <h4 className="text-sm font-medium mb-1">Add-ons:</h4>
-                            <ul className="space-y-1">
-                                {Object.values(selectedAddons).map((addon, index) => (
-                                    <li key={index} className="flex justify-between text-xs">
-                                        <span>{addon.title} (x{addon.participants}):</span>
-                                        <span>₹{addon.pricePerPerson * addon.participants}</span>
-                                    </li>
-                                ))}
-                            </ul>
+                    {/* Book Now Button */}
+                    <div className="my-2 p-4 bg-green-50 rounded-lg shadow-sm">
+                        <div className="flex flex-col sm:flex-row justify-between items-center">
+                            <div className="text-center sm:text-left mb-2 sm:mb-0">
+                                <p className="text-xs sm:text-sm text-gray-600 mt-0.5">
+                                    Total: <span className="font-bold text-green-800">₹{totalPrice}</span>
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => {
+                                    if (!localStorage.getItem('token')) {
+                                        setIsModalOpen(true);
+                                        return;
+                                    }
+                                    handleBookNow();
+                                }}
+                                className="w-full sm:w-auto bg-green-700 text-white px-4 sm:px-6 py-2 rounded-lg font-bold hover:bg-green-800 transition text-sm sm:text-base"
+                            >
+                                Book Now
+                            </button>
                         </div>
-                    )}
-
-                    <div className="flex justify-between border-t pt-2 mt-2">
-                        <span className="font-medium">Total:</span>
-                        <span className="font-bold text-lg">₹{totalPrice}</span>
                     </div>
                 </div>
-                {/* Book Now Button - Top */}
-                <div className="my-2 p-4 bg-green-50 rounded-lg shadow-sm">
-                    <div className="flex flex-col sm:flex-row justify-between items-center">
-                        <div className="text-center sm:text-left mb-2 sm:mb-0">
-
-                            <p className="text-xs sm:text-sm text-gray-600 mt-0.5">
-                                Total: <span className="font-bold text-green-800">₹{totalPrice}</span>
-                            </p>
-                        </div>
-                        <button
-                            onClick={()=>{
-                                if(!localStorage.getItem('token')){
-                                    setIsModalOpen(true);
-                                    return;
-                                }
-
-                                handleBookNow();
-                            }}
-                            className="w-full sm:w-auto bg-green-700 text-white px-4 sm:px-6 py-2 rounded-lg font-bold hover:bg-green-800 transition text-sm sm:text-base"
-                        >
-                            Book Now
-                        </button>
-                    </div>
-                </div>
-            </div>
             </div>
 
             {/* Add-On Modal */}
@@ -475,10 +614,10 @@ const DetailMain = () => {
                             max={noAdults + noChildren}
                             value={modalCount}
                             onChange={(e) => setModalCount(e.target.value)}
-                            className="w-full border border-gray-300 rounded px-2 py-1  focus:outline-none focus:ring focus:border-green-300"
+                            className="w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring focus:border-green-300"
                         />
                         {modalCount > noAdults + noChildren && (
-                            <p className="text-red-500  text-sm">
+                            <p className="text-red-500 text-sm">
                                 You can only add {noAdults + noChildren} participants.
                             </p>
                         )}
@@ -500,8 +639,8 @@ const DetailMain = () => {
                     </div>
                 </div>
             )}
-            <LoginSignupModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} handleBooking={handleBookNow} />
 
+            <LoginSignupModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} handleBooking={handleBookNow} />
         </>
     );
 };

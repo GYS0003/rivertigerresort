@@ -36,15 +36,12 @@ const Category = () => {
     e.preventDefault();
     const formData = new FormData(e.target);
     
-    // Remove the images field from formData
     formData.delete('images');
     
-    // Only append new images if they exist
     newImages.forEach(file => {
       formData.append('images', file);
     });
     
-    // Append images to delete only if needed
     if (imagesToDelete.length > 0) {
       imagesToDelete.forEach(id => formData.append('deleteImages', id));
     }
@@ -112,7 +109,6 @@ const Category = () => {
     setImagesToDelete([]);
     setNewImages([]);
     
-    // Reset file input
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -128,12 +124,10 @@ const Category = () => {
 
   const removeImage = (index, isExisting = false) => {
     if (isExisting) {
-      // For existing images, track which ones to delete
       const url = imagePreviews[index];
       const publicId = url.split('/').pop().split('.')[0];
       setImagesToDelete(prev => [...prev, publicId]);
     } else {
-      // For new images, remove from the newImages array
       const updatedImages = [...newImages];
       updatedImages.splice(index - (imagePreviews.length - newImages.length), 1);
       setNewImages(updatedImages);
@@ -142,16 +136,24 @@ const Category = () => {
     setImagePreviews(prev => prev.filter((_, i) => i !== index));
   };
 
+  const getMealPrices = (stay) => {
+    const meals = [];
+    if (stay.breakfastPrice && stay.breakfastPrice > 0) {
+      meals.push(`Breakfast: ₹${stay.breakfastPrice}`);
+    }
+    if (stay.lunchPrice && stay.lunchPrice > 0) {
+      meals.push(`Lunch: ₹${stay.lunchPrice}`);
+    }
+    if (stay.dinnerPrice && stay.dinnerPrice > 0) {
+      meals.push(`Dinner: ₹${stay.dinnerPrice}`);
+    }
+    return meals;
+  };
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Manage Stays</h1>
-        {/* <button
-          onClick={handleAddNew}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center"
-        >
-          <FiPlus className="mr-2" /> Add New Stay
-        </button> */}
       </div>
 
       {loading ? (
@@ -160,41 +162,53 @@ const Category = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {stays.map((stay) => (
-            <div key={stay._id} className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="h-48 bg-gray-200 relative">
-                {stay.images?.[0] && (
-                  <img
-                    src={stay.images[0]}
-                    alt={stay.name}
-                    className="w-full h-full object-cover"
-                  />
-                )}
-              </div>
-              <div className="p-4">
-                <div className="flex justify-between items-start">
-                  <h2 className="text-xl font-semibold">{stay.name}</h2>
-                  <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
-                    {stay.category}
-                  </span>
+          {stays.map((stay) => {
+            const mealPrices = getMealPrices(stay);
+            return (
+              <div key={stay._id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="h-48 bg-gray-200 relative">
+                  {stay.images?.[0] && (
+                    <img
+                      src={stay.images[0]}
+                      alt={stay.name}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
                 </div>
-                <p className="text-gray-600 mt-2">₹{stay.price} per night</p>
-                <p className="text-gray-600">Max guests: {stay.maxGuests}</p>
-                <div className="flex mt-4 space-x-2">
-                  <button
-                    onClick={() => handleEdit(stay)}
-                    className="flex items-center text-blue-600 hover:text-blue-800"
-                  >
-                    <FiEdit className="mr-1" /> Edit
-                  </button>
+                <div className="p-4">
+                  <div className="flex justify-between items-start">
+                    <h2 className="text-xl font-semibold">{stay.name}</h2>
+                    <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                      {stay.category}
+                    </span>
+                  </div>
+                  <p className="text-gray-600 mt-2">₹{stay.price} per night</p>
+                  <p className="text-gray-600">Max guests: {stay.maxGuests}</p>
+                  
+                  {mealPrices.length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-xs text-gray-500 font-medium">Meal Prices:</p>
+                      {mealPrices.map((meal, idx) => (
+                        <p key={idx} className="text-xs text-gray-600">{meal}</p>
+                      ))}
+                    </div>
+                  )}
+                  
+                  <div className="flex mt-4 space-x-2">
+                    <button
+                      onClick={() => handleEdit(stay)}
+                      className="flex items-center text-blue-600 hover:text-blue-800"
+                    >
+                      <FiEdit className="mr-1" /> Edit
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
-      {/* Modal for Add/Edit */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -255,6 +269,39 @@ const Category = () => {
                     defaultValue={editingStay?.maxGuests || ''}
                     className="w-full p-2 border rounded"
                     required
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-gray-700 mb-2">Breakfast Price (₹)</label>
+                  <input
+                    type="number"
+                    name="breakfastPrice"
+                    defaultValue={editingStay?.breakfastPrice || ''}
+                    className="w-full p-2 border rounded"
+                    placeholder="0"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-gray-700 mb-2">Lunch Price (₹)</label>
+                  <input
+                    type="number"
+                    name="lunchPrice"
+                    defaultValue={editingStay?.lunchPrice || ''}
+                    className="w-full p-2 border rounded"
+                    placeholder="0"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-gray-700 mb-2">Dinner Price (₹)</label>
+                  <input
+                    type="number"
+                    name="dinnerPrice"
+                    defaultValue={editingStay?.dinnerPrice || ''}
+                    className="w-full p-2 border rounded"
+                    placeholder="0"
                   />
                 </div>
 

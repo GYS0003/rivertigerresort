@@ -23,6 +23,9 @@ const BookingSchema = new mongoose.Schema(
     checkIn: { type: Date, required: true },
     checkOut: { type: Date, required: true },
     addons: [AddonSchema],
+    breakfastPrice: { type: Number, default: 0 },
+    lunchPrice: { type: Number, default: 0 },
+    dinnerPrice: { type: Number, default: 0 },
     totalPrice: { type: Number, required: true },
     userEmail: { type: String },
     phone: { type: String },
@@ -41,17 +44,17 @@ const BookingSchema = new mongoose.Schema(
     failedAt: { type: Date },
     paidAt: { type: Date },
     refund: {
-      approved: { type: Boolean, default: false },                 // admin toggle
-      requested: { type: Boolean, default: false },                 // user raised?
-      status: {                                                  // lifecycle
+      approved: { type: Boolean, default: false },
+      requested: { type: Boolean, default: false },
+      status: {
         type: String,
         enum: ['pending', 'approved', 'rejected', 'processed'],
         default: 'pending',
       },
-      amount: { type: Number, min: 0 },                      // ₹ value
-      refundPercentage: { type: Number, min: 0, max: 100 },           // e.g. 80 = 80 %
+      amount: { type: Number, min: 0 },
+      refundPercentage: { type: Number, min: 0, max: 100 },
       reason: { type: String },
-      razorpay_refund_id: String,                                    // once issued
+      razorpay_refund_id: String,
       requestedAt: Date,
       processedAt: Date,
     },
