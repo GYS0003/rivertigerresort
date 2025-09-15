@@ -142,17 +142,17 @@ const UserBooking = () => {
       ) : (
         <>
           <div className="flex flex-wrap gap-3 justify-center mb-4">
-            {stayBookings.length>0&&<Tab
+            {stayBookings.length > 0 && <Tab
               name="stays"
               label="Stays"
               count={stayBookings.length}
             />}
-            {adventureBookings.length>0&&<Tab
+            {adventureBookings.length > 0 && <Tab
               name="adventures"
               label="Adventures"
               count={adventureBookings.length}
             />}
-            {eventBookings.length>0&&<Tab
+            {eventBookings.length > 0 && <Tab
               name="events"
               label="Events"
               count={eventBookings.length}
@@ -193,21 +193,21 @@ const UserBooking = () => {
                     </div>
                   </div>
 
-                  {booking.paymentStatus === 'success' && !booking.refund.requested &&(
-                      <div className="flex items-end justify-end my-2">
-                        <button
-                          onClick={() => setCancelModal({ open: true, booking, type: 'event' })}
-                          className="w-full md:w-auto py-2 px-4 rounded-lg bg-amber-500 text-white text-sm
+                  {booking.paymentStatus === 'success' && !booking.refund.requested && (
+                    <div className="flex items-end justify-end my-2">
+                      <button
+                        onClick={() => setCancelModal({ open: true, booking, type: 'event' })}
+                        className="w-full md:w-auto py-2 px-4 rounded-lg bg-amber-500 text-white text-sm
                                      hover:bg-amber-600 focus:outline-none">
-                          Cancel booking
-                        </button>
-                      </div>
-                    )}
+                        Cancel booking
+                      </button>
+                    </div>
+                  )}
 
                   {booking.refund.approved &&
                     <div className="flex items-end justify-end">
                       <p className="text-sm text-gray-600">
-                         <span className="font-medium text-green-600">Refund {booking.refund.status}</span>
+                        <span className="font-medium text-green-600">Refund {booking.refund.status}</span>
                       </p>
                     </div>
                   }
@@ -261,15 +261,15 @@ const UserBooking = () => {
                   </div>
 
                   {booking.paymentStatus === 'success' && !booking.refund.requested && (
-                      <div className="flex items-end justify-end my-2">
-                        <button
-                          onClick={() => setCancelModal({ open: true, booking, type: 'adventure' })}
-                          className="w-full md:w-auto py-2 px-4 rounded-lg bg-amber-500 text-white text-sm
+                    <div className="flex items-end justify-end my-2">
+                      <button
+                        onClick={() => setCancelModal({ open: true, booking, type: 'adventure' })}
+                        className="w-full md:w-auto py-2 px-4 rounded-lg bg-amber-500 text-white text-sm
                                      hover:bg-amber-600 focus:outline-none">
-                          Cancel booking
-                        </button>
-                      </div>
-                    )}
+                        Cancel booking
+                      </button>
+                    </div>
+                  )}
 
                   {booking.refund.approved &&
                     <div className="flex items-end justify-end">
@@ -341,17 +341,15 @@ const UserBooking = () => {
                         )}
                       </div>
                       {booking.paymentStatus === 'success' && !booking.refund.requested && (
-                          <div className="flex items-end justify-end my-2">
-
-
-                            <button
-                              onClick={() => setCancelModal({ open: true, booking, type: 'stay' })}
-                              className="w-full py-2 px-4 rounded-lg bg-amber-500 text-white text-sm
+                        <div className="flex items-end justify-end my-2">
+                          <button
+                            onClick={() => setCancelModal({ open: true, booking, type: 'stay' })}
+                            className="w-full py-2 px-4 rounded-lg bg-amber-500 text-white text-sm
                  hover:bg-amber-600 focus:outline-none">
-                              Cancel booking
-                            </button>
-                          </div>
-                        )}
+                            Cancel booking
+                          </button>
+                        </div>
+                      )}
                       {booking.refund.approved &&
                         <div className="flex items-end justify-end">
                           <p className="text-sm text-gray-600">
