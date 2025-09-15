@@ -193,8 +193,7 @@ const UserBooking = () => {
                     </div>
                   </div>
 
-                  {booking.paymentStatus === 'success' && !booking.refund.requested &&
-                    canCancel(booking?.eventDate) && (
+                  {booking.paymentStatus === 'success' && !booking.refund.requested &&(
                       <div className="flex items-end justify-end my-2">
                         <button
                           onClick={() => setCancelModal({ open: true, booking, type: 'event' })}
@@ -261,8 +260,7 @@ const UserBooking = () => {
                     </div>
                   </div>
 
-                  {booking.paymentStatus === 'success' && !booking.refund.requested &&
-                    canCancel(booking.adventureDate) && (
+                  {booking.paymentStatus === 'success' && !booking.refund.requested && (
                       <div className="flex items-end justify-end my-2">
                         <button
                           onClick={() => setCancelModal({ open: true, booking, type: 'adventure' })}
@@ -342,8 +340,7 @@ const UserBooking = () => {
                           </div>
                         )}
                       </div>
-                      {booking.paymentStatus === 'success' && !booking.refund.requested &&
-                        canCancel(booking.checkIn) && (
+                      {booking.paymentStatus === 'success' && !booking.refund.requested && (
                           <div className="flex items-end justify-end my-2">
 
 
