@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import LoginSignupModal from '@/components/sections/login/LoginSignupModal';
@@ -27,6 +27,13 @@ const DetailMain = () => {
     const [showAllAdventures, setShowAllAdventures] = useState(false);
     const [checkInDate, setCheckInDate] = useState(null);
     const [checkOutDate, setCheckOutDate] = useState(null);
+    const [showAllMeals, setShowAllMeals] = useState(false);
+    // **FIXED: Image Gallery States**
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [showLightbox, setShowLightbox] = useState(false);
+    const [lightboxImageIndex, setLightboxImageIndex] = useState(0);
+    const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+    const autoPlayRef = useRef(null);
 
     // Calculate total price whenever components change
     useEffect(() => {
@@ -53,6 +60,39 @@ const DetailMain = () => {
 
         setTotalPrice(calculatedTotal);
     }, [stayPrice, numNights, selectedAddons, selectedMeals, stay, noAdults, noChildren]);
+
+    // **FIXED: Auto-play functionality with proper cleanup**
+    useEffect(() => {
+        if (!stay?.images || stay.images.length <= 1 || !isAutoPlaying) {
+            return;
+        }
+
+        autoPlayRef.current = setInterval(() => {
+            setCurrentImageIndex((prevIndex) =>
+                prevIndex === stay.images.length - 1 ? 0 : prevIndex + 1
+            );
+        }, 4000);
+
+        return () => {
+            if (autoPlayRef.current) {
+                clearInterval(autoPlayRef.current);
+            }
+        };
+    }, [stay?.images?.length, isAutoPlaying]);
+
+    // **FIXED: Pause and resume functions**
+    const pauseAutoPlay = () => {
+        setIsAutoPlaying(false);
+        if (autoPlayRef.current) {
+            clearInterval(autoPlayRef.current);
+        }
+    };
+
+    const resumeAutoPlay = () => {
+        setTimeout(() => {
+            setIsAutoPlaying(true);
+        }, 8000);
+    };
 
     // Booking details from localStorage
     useEffect(() => {
@@ -148,6 +188,58 @@ const DetailMain = () => {
         }));
     };
 
+    // **FIXED: Image navigation functions**
+    const nextImage = () => {
+        if (!stay?.images?.length) return;
+        pauseAutoPlay();
+        setCurrentImageIndex((prevIndex) =>
+            prevIndex === stay.images.length - 1 ? 0 : prevIndex + 1
+        );
+        resumeAutoPlay();
+    };
+
+    const prevImage = () => {
+        if (!stay?.images?.length) return;
+        pauseAutoPlay();
+        setCurrentImageIndex((prevIndex) =>
+            prevIndex === 0 ? stay.images.length - 1 : prevIndex - 1
+        );
+        resumeAutoPlay();
+    };
+
+    const goToImage = (index) => {
+        if (!stay?.images?.length || index < 0 || index >= stay.images.length) return;
+        pauseAutoPlay();
+        setCurrentImageIndex(index);
+        resumeAutoPlay();
+    };
+
+    // **FIXED: Lightbox functions**
+    const openLightbox = (index) => {
+        setLightboxImageIndex(index);
+        setShowLightbox(true);
+        pauseAutoPlay();
+    };
+
+    const closeLightbox = () => {
+        setShowLightbox(false);
+        resumeAutoPlay();
+    };
+
+    const nextLightboxImage = () => {
+        if (!stay?.images?.length) return;
+        setLightboxImageIndex((prevIndex) =>
+            prevIndex === stay.images.length - 1 ? 0 : prevIndex + 1
+        );
+    };
+
+    const prevLightboxImage = () => {
+        if (!stay?.images?.length) return;
+        setLightboxImageIndex((prevIndex) =>
+            prevIndex === 0 ? stay.images.length - 1 : prevIndex - 1
+        );
+    };
+
     const handleBookNow = async () => {
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
@@ -237,9 +329,10 @@ const DetailMain = () => {
         </div>
     );
 
-    const mainImage = stay.images?.length > 0
-        ? stay.images[0]
-        : getDefaultImage(stay.category);
+    // **FIXED: Prepare images array with fallback**
+    const images = stay?.images?.length > 0
+        ? stay.images
+        : [getDefaultImage(stay.category)];
 
     const totalGuests = noAdults + noChildren;
 
@@ -280,18 +373,120 @@ const DetailMain = () => {
                         </div>
                     </div>
 
-                    {/* Main Image */}
-                    {mainImage && (
-                        <div className="relative w-full h-40 sm:h-52 md:h-64 rounded-lg overflow-hidden shadow-md mb-4">
-                            <Image
-                                src={mainImage}
-                                alt={stay.name}
-                                fill
-                                className="object-cover rounded-t-xl"
-                                priority
-                            />
+                    {/* **ENHANCED: Image Gallery with Radio Button Style Thumbnails** */}
+                    <div className="mb-4">
+                        {/* Main Image Carousel */}
+                        <div className="relative w-full h-40 sm:h-52 md:h-64 lg:h-80 rounded-lg overflow-hidden shadow-lg mb-4 group">
+                            {images.length > 0 ? (
+                                <div className="relative w-full h-full">
+                                    <Image
+                                        src={images[currentImageIndex]}
+                                        alt={`${stay?.name || "Stay"} - Image ${currentImageIndex + 1}`}
+                                        fill
+                                        className="object-cover cursor-pointer transition-transform duration-300 hover:scale-105"
+                                        priority
+                                        onClick={() => openLightbox(currentImageIndex)}
+                                        sizes="100vw"
+                                    />
+
+                                    {/* Navigation Arrows */}
+                                    {images.length > 1 && (
+                                        <>
+                                            <button
+                                                onClick={prevImage}
+                                                className="absolute left-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-all duration-200 opacity-0 group-hover:opacity-100"
+                                            >
+                                                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                                                </svg>
+                                            </button>
+                                            <button
+                                                onClick={nextImage}
+                                                className="absolute right-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-all duration-200 opacity-0 group-hover:opacity-100"
+                                            >
+                                                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                                                </svg>
+                                            </button>
+                                        </>
+                                    )}
+
+                                    {/* Selection Status Display */}
+                                    <div className="absolute top-2 right-2 flex items-center space-x-2">
+                                        <div className="bg-black bg-opacity-70 text-white px-3 py-1 rounded-lg text-xs font-medium flex items-center">
+                                            <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                                            Selected: {currentImageIndex + 1} / {images.length}
+                                        </div>
+                                        <button
+                                            onClick={() => openLightbox(currentImageIndex)}
+                                            className="bg-black bg-opacity-60 text-white p-1.5 rounded-md hover:bg-opacity-80 transition-all duration-200"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m-3 0h3m-3 0H7" />
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    {/* Auto-play Status */}
+                                    {images.length > 1 && isAutoPlaying && (
+                                        <div className="absolute top-2 left-2">
+                                            <div className="bg-blue-600 bg-opacity-80 text-white px-2 py-1 rounded-md text-xs font-medium flex items-center">
+                                                <div className="w-2 h-2 bg-white rounded-full animate-pulse mr-1"></div>
+                                                Auto
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="flex items-center justify-center w-full h-full bg-gray-100 text-gray-500">
+                                    <div className="text-center">
+                                        <svg className="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        <p className="text-sm">No images available</p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
-                    )}
+
+                        {/* **RADIO BUTTON STYLE: Thumbnail Strip** */}
+                        {images.length > 1 && (
+                            <div className="mb-4">
+                                <h3 className="text-sm font-medium text-gray-700 mb-3">View Gallery:</h3>
+                                <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
+                                    {images.map((image, index) => (
+                                        <label key={index} className="relative py-2 pl-1  cursor-pointer">
+                                            {/* Hidden Radio Input */}
+                                            <input
+                                                type="radio"
+                                                name="image-selection"
+                                                value={index}
+                                                checked={index === currentImageIndex}
+                                                onChange={() => goToImage(index)}
+                                                className="sr-only"
+                                            />
+
+                                            {/* Thumbnail Button */}
+                                            <div
+                                                className={`relative flex-shrink-0  w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border-2 transition-all duration-300 ${index === currentImageIndex
+                                                    ? 'border-green-500 ring-2 ring-green-300 ring-opacity-50 shadow-lg transform scale-105'
+                                                    : 'border-gray-300 hover:border-gray-400 hover:shadow-md'
+                                                    }`}
+                                            >
+                                                <Image
+                                                    src={image}
+                                                    alt={`${stay?.name || "Stay"} thumbnail ${index + 1}`}
+                                                    fill
+                                                    className="object-cover"
+                                                    sizes="(max-width: 640px) 4rem, 5rem"
+                                                />
+                                            </div>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
 
                     {/* Stay Info */}
                     <div className="mb-3">
@@ -323,96 +518,135 @@ const DetailMain = () => {
                     </div>
                 </div>
 
-                {/* Meals Section */}
-                {(stay.breakfastPrice > 0 || stay.lunchPrice > 0 || stay.dinnerPrice > 0) && (
-                    <div className="p-2 sm:p-3 bg-blue-50 rounded-lg shadow-sm mb-4">
-                        <h2 className="text-lg sm:text-xl font-bold text-center mb-3 sm:mb-4 text-green-900">
-                            Meal Options
-                        </h2>
+{/* Meals Section - All-in-one Implementation */}
+{(stay.breakfastPrice > 0 || stay.lunchPrice > 0 || stay.dinnerPrice > 0) && (
+    <div className="p-2 sm:p-3 bg-blue-50 rounded-lg shadow-sm mb-4">
+        <h2 className="text-lg sm:text-xl font-bold text-center mb-3 sm:mb-4 text-green-900">
+            Meal Options
+        </h2>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
-                            {stay.breakfastPrice > 0 && (
-                                <div className="border border-blue-200 rounded-lg p-3 bg-gradient-to-r from-blue-50 to-white shadow-sm">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <h3 className="font-bold text-sm sm:text-base text-green-900">Breakfast</h3>
-                                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
-                                            ₹{stay.breakfastPrice}/person
-                                        </span>
-                                           <button
-                                            onClick={() => handleMealToggle('breakfast')}
-                                            className={`px-3 py-1 rounded-lg font-medium transition text-xs ${selectedMeals.breakfast
-                                                    ? 'bg-green-700 text-white hover:bg-green-800'
-                                                    : 'bg-green-900 text-white hover:bg-green-600'
-                                                }`}
-                                        >
-                                            {selectedMeals.breakfast ? 'Added' : 'Add'}
-                                        </button>
-                                    </div>
-
-                                    {selectedMeals.breakfast && (
-                                        <div className="mt-2 pt-2 flex justify-between border-t text-xs">
-                                            <div className="text-gray-500">({totalGuests} guests × {numNights} nights)</div>
-                                            <div className="text-gray-600">Total: ₹{stay.breakfastPrice * totalGuests * numNights}</div>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {stay.lunchPrice > 0 && (
-                                <div className="border border-blue-200 rounded-lg p-3 bg-gradient-to-r from-blue-50 to-white shadow-sm">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <h3 className="font-bold text-sm sm:text-base text-green-900">Lunch</h3>
-                                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
-                                            ₹{stay.lunchPrice}/person
-                                        </span>
-                                        <button
-                                            onClick={() => handleMealToggle('lunch')}
-                                            className={`px-3 py-1 rounded-lg font-medium transition text-xs ${selectedMeals.lunch
-                                                    ? 'bg-green-700 text-white hover:bg-green-800'
-                                                    : 'bg-green-900 text-white hover:bg-green-700'
-                                                }`}
-                                        >
-                                            {selectedMeals.lunch ? 'Added' : 'Add'}
-                                        </button>
-                                    </div>
-
-                                    {selectedMeals.lunch && (
-                                        <div className="mt-2 pt-2 flex justify-between border-t text-xs">
-                                            <div className="text-gray-500">({totalGuests} guests × {numNights} nights)</div>
-                                            <div className="text-gray-900 font-semibold">Total: ₹{stay.lunchPrice * totalGuests * numNights}</div>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {stay.dinnerPrice > 0 && (
-                                <div className="border border-blue-200 rounded-lg p-3 bg-gradient-to-r from-blue-50 to-white shadow-sm">
-                                    <div className="flex  items-center justify-between mb-2">
-                                        <h3 className="font-bold text-sm sm:text-base text-green-900">Dinner</h3>
-                                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
-                                            ₹{stay.dinnerPrice}/person
-                                        </span>
-                                        <button
-                                            onClick={() => handleMealToggle('dinner')}
-                                            className={`px-3 py-1 rounded-lg font-medium transition text-xs ${selectedMeals.dinner
-                                                    ? 'bg-green-700 text-white hover:bg-green-800'
-                                                    : 'bg-green-900 text-white hover:bg-green-700'
-                                                }`}
-                                        >
-                                            {selectedMeals.dinner ? 'Added' : 'Add'}
-                                        </button>
-                                    </div>
-                                    {selectedMeals.dinner && (
-                                        <div className="mt-2 pt-2 flex justify-between border-t text-xs">
-                                            <div className="text-gray-500">({totalGuests} guests × {numNights} nights)</div>
-                                            <div className="text-gray-800 font-semibold">Total: ₹{stay.dinnerPrice * totalGuests * numNights}</div>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
+        <div className="space-y-3 md:space-y-0 md:grid md:grid-cols-3 md:gap-4">
+            {/* Breakfast */}
+            {stay.breakfastPrice > 0 && (
+                <label className={`flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all duration-300 ${
+                    selectedMeals.breakfast ? 'bg-purple-100 border-purple-300' : 'bg-white border-gray-200 hover:border-gray-300'
+                } ${!showAllMeals ? 'block' : 'block'} md:block`}>
+                    <input type="checkbox" checked={selectedMeals.breakfast} onChange={() => handleMealToggle('breakfast')} className="sr-only" />
+                    <div className={`w-6 h-6 mr-4 mt-0.5 rounded-full border-2 flex items-center justify-center transition-all ${
+                        selectedMeals.breakfast ? 'bg-purple-500 border-purple-500' : 'bg-white border-gray-400'
+                    }`}>
+                        {selectedMeals.breakfast && (
+                            <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                            </svg>
+                        )}
                     </div>
-                )}
+                    <div className="flex-1">
+                        <div className="flex justify-between items-center mb-1">
+                            <h3 className={`font-bold ${selectedMeals.breakfast ? 'text-purple-800' : 'text-gray-800'}`}>Breakfast</h3>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                selectedMeals.breakfast ? 'bg-purple-200 text-purple-800' : 'bg-gray-100 text-gray-700'
+                            }`}>₹{stay.breakfastPrice}/person</span>
+                        </div>
+                        {selectedMeals.breakfast && (
+                            <div className="mt-3 pt-2 border-t border-purple-200 text-sm">
+                                <div className="flex justify-between">
+                                    <span className="text-purple-600">{totalGuests} guests × {numNights} nights</span>
+                                    <span className="font-semibold text-purple-700">₹{stay.breakfastPrice * totalGuests * numNights}</span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </label>
+            )}
+
+            {/* Lunch */}
+            {stay.lunchPrice > 0 && (
+                <label className={`flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all duration-300 ${
+                    selectedMeals.lunch ? 'bg-purple-100 border-purple-300' : 'bg-white border-gray-200 hover:border-gray-300'
+                } ${!showAllMeals ? 'hidden' : 'block'} md:block`}>
+                    <input type="checkbox" checked={selectedMeals.lunch} onChange={() => handleMealToggle('lunch')} className="sr-only" />
+                    <div className={`w-6 h-6 mr-4 mt-0.5 rounded-full border-2 flex items-center justify-center transition-all ${
+                        selectedMeals.lunch ? 'bg-purple-500 border-purple-500' : 'bg-white border-gray-400'
+                    }`}>
+                        {selectedMeals.lunch && (
+                            <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                            </svg>
+                        )}
+                    </div>
+                    <div className="flex-1">
+                        <div className="flex justify-between items-center mb-1">
+                            <h3 className={`font-bold ${selectedMeals.lunch ? 'text-purple-800' : 'text-gray-800'}`}>Lunch</h3>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                selectedMeals.lunch ? 'bg-purple-200 text-purple-800' : 'bg-gray-100 text-gray-700'
+                            }`}>₹{stay.lunchPrice}/person</span>
+                        </div>
+                        {selectedMeals.lunch && (
+                            <div className="mt-3 pt-2 border-t border-purple-200 text-sm">
+                                <div className="flex justify-between">
+                                    <span className="text-purple-600">{totalGuests} guests × {numNights} nights</span>
+                                    <span className="font-semibold text-purple-700">₹{stay.lunchPrice * totalGuests * numNights}</span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </label>
+            )}
+
+            {/* Dinner */}
+            {stay.dinnerPrice > 0 && (
+                <label className={`flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all duration-300 ${
+                    selectedMeals.dinner ? 'bg-purple-100 border-purple-300' : 'bg-white border-gray-200 hover:border-gray-300'
+                } ${!showAllMeals ? 'hidden' : 'block'} md:block`}>
+                    <input type="checkbox" checked={selectedMeals.dinner} onChange={() => handleMealToggle('dinner')} className="sr-only" />
+                    <div className={`w-6 h-6 mr-4 mt-0.5 rounded-full border-2 flex items-center justify-center transition-all ${
+                        selectedMeals.dinner ? 'bg-purple-500 border-purple-500' : 'bg-white border-gray-400'
+                    }`}>
+                        {selectedMeals.dinner && (
+                            <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                            </svg>
+                        )}
+                    </div>
+                    <div className="flex-1">
+                        <div className="flex justify-between items-center mb-1">
+                            <h3 className={`font-bold ${selectedMeals.dinner ? 'text-purple-800' : 'text-gray-800'}`}>Dinner</h3>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                selectedMeals.dinner ? 'bg-purple-200 text-purple-800' : 'bg-gray-100 text-gray-700'
+                            }`}>₹{stay.dinnerPrice}/person</span>
+                        </div>
+                        {selectedMeals.dinner && (
+                            <div className="mt-3 pt-2 border-t border-purple-200 text-sm">
+                                <div className="flex justify-between">
+                                    <span className="text-purple-600">{totalGuests} guests × {numNights} nights</span>
+                                    <span className="font-semibold text-purple-700">₹{stay.dinnerPrice * totalGuests * numNights}</span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </label>
+            )}
+        </div>
+
+        {/* Mobile Toggle Button */}
+        <div className="md:hidden mt-4 text-center">
+            {((stay.lunchPrice > 0 && stay.breakfastPrice > 0) || (stay.dinnerPrice > 0 && stay.breakfastPrice > 0)) && (
+                <button
+                    onClick={() => setShowAllMeals(!showAllMeals)}
+                    className="inline-flex items-center border p-1 rounded-md text-green-700 hover:text-green-800 font-medium transition-colors"
+                >
+                    {showAllMeals ? 'View Less' : 'View All'}
+                    <svg className={`ml-2 w-4 h-4 transition-transform duration-300 ${showAllMeals ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+            )}
+        </div>
+    </div>
+)}
+
+
 
                 {/* Add-ons */}
                 <div className="p-2 sm:p-3 bg-amber-100 rounded-t-lg shadow-sm">
@@ -601,6 +835,88 @@ const DetailMain = () => {
                 </div>
             </div>
 
+            {/* **ENHANCED: Image Lightbox Modal** */}
+            {showLightbox && (
+                <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
+                    <div className="relative max-w-6xl max-h-full w-full h-full flex items-center justify-center">
+                        {/* Close Button */}
+                        <button
+                            onClick={closeLightbox}
+                            className="absolute top-4 right-4 z-10 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-all duration-200"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+
+                        {/* Navigation Arrows */}
+                        {images.length > 1 && (
+                            <>
+                                <button
+                                    onClick={prevLightboxImage}
+                                    className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75 transition-all duration-200"
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                </button>
+                                <button
+                                    onClick={nextLightboxImage}
+                                    className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75 transition-all duration-200"
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                            </>
+                        )}
+
+                        {/* Main Lightbox Image */}
+                        <div className="relative w-full h-full max-w-4xl max-h-[80vh]">
+                            <Image
+                                src={images[lightboxImageIndex]}
+                                alt={`${stay.name} - Large view ${lightboxImageIndex + 1}`}
+                                fill
+                                className="object-contain"
+                                priority
+                            />
+                        </div>
+
+                        {/* Image Info */}
+                        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-60 text-white px-4 py-2 rounded-lg">
+                            <p className="text-sm font-medium">{stay.name}</p>
+                            {images.length > 1 && (
+                                <p className="text-xs opacity-75">{lightboxImageIndex + 1} of {images.length}</p>
+                            )}
+                        </div>
+
+                        {/* Lightbox Thumbnail Navigation */}
+                        {images.length > 1 && (
+                            <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 flex space-x-2 max-w-full overflow-x-auto px-4">
+                                {images.map((image, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => setLightboxImageIndex(index)}
+                                        className={`relative flex-shrink-0 w-12 h-12 rounded-md overflow-hidden border-2 transition-all duration-200 ${index === lightboxImageIndex
+                                            ? 'border-white opacity-100'
+                                            : 'border-gray-500 opacity-60 hover:opacity-100'
+                                            }`}
+                                    >
+                                        <Image
+                                            src={image}
+                                            alt={`Thumbnail ${index + 1}`}
+                                            fill
+                                            className="object-cover"
+                                            sizes="3rem"
+                                        />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
             {/* Add-On Modal */}
             {showAddonModal && activeAddon && (
                 <div className="fixed inset-0 bg-black/30 bg-opacity-50 flex items-center justify-center z-50">
@@ -641,6 +957,17 @@ const DetailMain = () => {
             )}
 
             <LoginSignupModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} handleBooking={handleBookNow} />
+
+            {/* CSS for hiding scrollbar */}
+            <style jsx>{`
+                .scrollbar-hide {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
+                }
+                .scrollbar-hide::-webkit-scrollbar {
+                    display: none;
+                }
+            `}</style>
         </>
     );
 };
