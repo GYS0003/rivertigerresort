@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const staySchema = new mongoose.Schema({
   category: {
     type: String,
-    enum: ['tents', 'villas', 'cottages'],
+    enum: ['tents', 'villas','rooms', 'cottages'],
     required: true,
   },
   name: {

@@ -15,7 +15,7 @@ const Category = () => {
   const fileInputRef = useRef(null);
   const router = useRouter();
 
-  const categories = ['tents', 'villas', 'cottages'];
+  const categories = ['tents', 'villas','rooms', 'cottages'];
 
   const fetchStays = async () => {
     try {
