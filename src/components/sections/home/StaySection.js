@@ -49,11 +49,38 @@ export default function StaySection() {
     }
   }, [])
 
-  // Save to localStorage whenever data changes
+  // Save to localStorage with timestamp
   useEffect(() => {
-    const bookingData = { checkIn, checkOut, adults, children }
+    const bookingData = {
+      checkIn,
+      checkOut,
+      adults,
+      children,
+      timestamp: Date.now() // Add timestamp
+    }
     localStorage.setItem('bookingData', JSON.stringify(bookingData))
   }, [checkIn, checkOut, adults, children])
+
+  // Update your initialization useEffect to check expiration
+  useEffect(() => {
+    const savedData = localStorage.getItem('bookingData')
+    if (savedData) {
+      const parsedData = JSON.parse(savedData)
+      const fiveMinutesAgo = Date.now() - (5 * 60 * 1000)
+
+      // Check if data is older than 5 minutes
+      if (parsedData.timestamp && parsedData.timestamp < fiveMinutesAgo) {
+        localStorage.removeItem('bookingData')
+        console.log('Expired booking data removed')
+      } else {
+        setCheckIn(parsedData.checkIn || '')
+        setCheckOut(parsedData.checkOut || '')
+        setAdults(parsedData.adults || 1)
+        setChildren(parsedData.children || 0)
+      }
+    }
+  }, [])
+
 
   const getNextDay = (dateString) => {
     if (!dateString) return ''
@@ -82,6 +109,15 @@ export default function StaySection() {
     setShowBookingModal(false);
   };
 
+  // **UPDATED: Handle card click with disabled check**
+  const handleCardClick = (stay) => {
+    if (stay.isDisabled) {
+      // Show coming soon message for disabled stays
+      alert('This accommodation is currently not available. Coming soon!');
+      return;
+    }
+    openBookingModal(stay);
+  };
 
   const openBookingModal = (stay) => {
     setSelectedStay(stay)
@@ -151,7 +187,6 @@ export default function StaySection() {
         <h2 className="text-2xl sm:text-3xl font-semibold text-green-900">Stay Amidst Nature</h2>
         <p className="text-sm sm:text-base text-gray-600 mt-2">
           Tents and cottages designed for explorers
-          {/* <span className="inline-block ml-2 text-green-900">→</span> */}
         </p>
       </div>
 
@@ -165,8 +200,11 @@ export default function StaySection() {
           return (
             <div
               key={stay._id}
-              className="rounded-xl overflow-hidden shadow-md bg-white transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer"
-              onClick={() => openBookingModal(stay)}
+              className={`rounded-xl overflow-hidden shadow-md bg-white transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer relative ${stay.isDisabled
+                  ? 'grayscale opacity-70 hover:opacity-80 cursor-not-allowed'
+                  : 'cursor-pointer'
+                }`}
+              onClick={() => handleCardClick(stay)}
             >
               <div className="relative w-full h-56 sm:h-64 md:h-72">
                 <Image
@@ -174,16 +212,46 @@ export default function StaySection() {
                   alt={stay.name}
                   fill
                   className="object-cover rounded-t-xl"
-                  priority // Optional for LCP performance
+                  priority
                 />
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
-                  <div className="flex justify-between items-end">
-                    <h3 className="text-xl font-semibold text-white">{stay.name}</h3>
-                    <span className="bg-green-900 text-white px-3 py-1 rounded-full text-sm font-medium">
-                      ₹{stay.price}/night
-                    </span>
+
+                {/* **UPDATED: Enhanced disabled overlay** */}
+                {stay.isDisabled && (
+                  <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-transparent to-gray-900 bg-opacity-70 flex items-center justify-center z-10">
+                    <div className="text-center">
+                      <div className="bg-orange-500 text-white px-4 py-2 rounded-lg shadow-lg mb-2">
+                        <span className="font-bold text-lg">COMING SOON</span>
+                      </div>
+                      <p className="text-white text-sm bg-black bg-opacity-50 px-3 py-1 rounded">
+                        Currently not available
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {/* **UPDATED: Conditional price badge** */}
+                {!stay.isDisabled && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                    <div className="flex justify-between items-end">
+                      <h3 className="text-xl font-semibold text-white">{stay.name}</h3>
+                      <span className="bg-green-900 text-white px-3 py-1 rounded-full text-sm font-medium">
+                        ₹{stay.price}/night
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* **NEW: Disabled stay title overlay** */}
+                {stay.isDisabled && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                    <div className="flex justify-between items-end">
+                      <h3 className="text-xl font-semibold text-white opacity-75">{stay.name}</h3>
+                      <span className="bg-gray-600 text-white px-3 py-1 rounded-full text-sm font-medium opacity-75">
+                        Coming Soon
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="p-5">
@@ -191,29 +259,54 @@ export default function StaySection() {
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
-                  <span className="text-sm">Max {stay.maxGuests} {stay.maxGuests > 1 ? 'guests' : 'guest'}</span>
+                  <span className={`text-sm ${stay.isDisabled ? 'text-gray-400' : ''}`}>
+                    Max {stay.maxGuests} {stay.maxGuests > 1 ? 'guests' : 'guest'}
+                  </span>
                 </div>
 
-                <p className="text-gray-700 mb-4 line-clamp-2">{stay.description}</p>
+                <p className={`mb-4 line-clamp-2 ${stay.isDisabled ? 'text-gray-400' : 'text-gray-700'
+                  }`}>
+                  {stay.description}
+                </p>
 
                 <div className="flex flex-wrap gap-2 mb-4">
                   {stay.amenities.slice(0, 3).map((amenity, idx) => (
-                    <span key={idx} className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
+                    <span key={idx} className={`text-xs px-2 py-1 rounded ${stay.isDisabled
+                        ? 'bg-gray-200 text-gray-500'
+                        : 'bg-green-100 text-green-800'
+                      }`}>
                       {amenity}
                     </span>
                   ))}
                   {stay.amenities.length > 3 && (
-                    <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
+                    <span className={`text-xs px-2 py-1 rounded ${stay.isDisabled
+                        ? 'bg-gray-200 text-gray-500'
+                        : 'bg-green-100 text-green-800'
+                      }`}>
                       +{stay.amenities.length - 3} more
                     </span>
                   )}
                 </div>
 
-                <button
-                  className="w-full text-center bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-800 transition"
-                >
-                  Book Now for {stay.price} →
-                </button>
+                {/* **UPDATED: Conditional button rendering** */}
+                {stay.isDisabled ? (
+                  <button
+                    className="w-full text-center bg-gray-400 text-gray-600 px-4 py-2 rounded-md cursor-not-allowed"
+                    disabled
+                  >
+                    Coming Soon
+                  </button>
+                ) : (
+                  <button
+                    className="w-full text-center bg-green-900 text-white px-4 py-2 rounded-md hover:bg-green-800 transition"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent card click
+                      openBookingModal(stay);
+                    }}
+                  >
+                    Book Now for ₹{stay.price} →
+                  </button>
+                )}
               </div>
             </div>
           )
@@ -232,8 +325,8 @@ export default function StaySection() {
         </div>
       )}
 
-      {/* Booking Modal */}
-      {showBookingModal && selectedStay && (
+      {/* Booking Modal - Only for enabled stays */}
+      {showBookingModal && selectedStay && !selectedStay.isDisabled && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl w-full max-w-md">
             <div className="p-6">
@@ -305,7 +398,7 @@ export default function StaySection() {
       )}
 
       {/* Guest Selection Popup */}
-      {showGuestPopup && selectedStay && (
+      {showGuestPopup && selectedStay && !selectedStay.isDisabled && (
         <div className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4">
           <div className="bg-white rounded-xl w-full max-w-sm p-6">
             <div className="flex justify-between items-center mb-4">

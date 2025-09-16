@@ -22,6 +22,14 @@ const staySchema = new mongoose.Schema({
   amenities: [String],
   images: [String],
   specialNotes: String,
+  meals:{
+    type: Boolean,
+    default: false,
+  },
+  isDisabled: {
+    type: Boolean,
+    default: false,
+  },
   breakfastPrice: {
     type: Number,
     required: false,
