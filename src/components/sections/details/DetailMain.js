@@ -595,7 +595,7 @@ const DetailMain = () => {
             )}
 
             {/* Dinner */}
-            {stay.dinnerPrice > 0 && (
+            {stay.meals &&stay.dinnerPrice > 0 && (
                 <label className={`flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all duration-300 ${
                     selectedMeals.dinner ? 'bg-purple-100 border-purple-300' : 'bg-white border-gray-200 hover:border-gray-300'
                 } ${!showAllMeals ? 'hidden' : 'block'} md:block`}>

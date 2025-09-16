@@ -60,6 +60,8 @@ export async function POST(req) {
     ...data,
     price: Number(data.price),
     maxGuests: Number(data.maxGuests),
+    meals: data.meals === 'true' || data.meals === true,
+    isDisabled: data.isDisabled === 'true' || data.isDisabled === true,
     breakfastPrice: Number(data.breakfastPrice || 0),
     lunchPrice: Number(data.lunchPrice || 0),
     dinnerPrice: Number(data.dinnerPrice || 0),
@@ -119,6 +121,8 @@ export async function PUT(req) {
     ...data,
     price: Number(data.price),
     maxGuests: Number(data.maxGuests),
+    meals: data.meals === 'true' || data.meals === true,
+    isDisabled: data.isDisabled === 'true' || data.isDisabled === true,
     breakfastPrice: Number(data.breakfastPrice || 0),
     lunchPrice: Number(data.lunchPrice || 0),
     dinnerPrice: Number(data.dinnerPrice || 0),
@@ -149,4 +153,38 @@ export async function DELETE(req) {
 
   await Stay.findByIdAndDelete(id);
   return Response.json({ success: true, message: 'Deleted successfully' });
+}
+// Add this PATCH method to your existing API route
+export async function PATCH(req) {
+  try {
+    await connectDB();
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+    
+    if (!id) {
+      return Response.json({ error: 'ID required' }, { status: 400 });
+    }
+
+    const { isDisabled } = await req.json();
+
+    const updatedStay = await Stay.findByIdAndUpdate(
+      id,
+      { isDisabled },
+      { new: true }
+    );
+
+    if (!updatedStay) {
+      return Response.json({ error: 'Stay not found' }, { status: 404 });
+    }
+
+    return Response.json({ 
+      success: true, 
+      data: updatedStay 
+    });
+  } catch (error) {
+    return Response.json(
+      { success: false, message: error.message },
+      { status: 500 }
+    );
+  }
 }

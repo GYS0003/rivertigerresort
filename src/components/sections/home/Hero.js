@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function Hero() {
@@ -72,15 +72,40 @@ export default function Hero() {
     }
   }, [roomCategory, roomOptions]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    // Save to localStorage only on submit
-    const bookingData = { checkIn, checkOut, roomCategory, adults, children };
-    localStorage.setItem('bookingData', JSON.stringify(bookingData));
-    
-    router.push(`/details/${roomCategory}`);
+// Add this at component level
+const clearTimerRef = useRef(null);
+
+const handleSubmit = (e) => {
+  e.preventDefault();
+  
+  // Clear any existing timer
+  if (clearTimerRef.current) {
+    clearTimeout(clearTimerRef.current);
+  }
+  
+  // Save to localStorage
+  const bookingData = { checkIn, checkOut, roomCategory, adults, children };
+  localStorage.setItem('bookingData', JSON.stringify(bookingData));
+  
+  // Set new timer to clear after 5 minutes
+  clearTimerRef.current = setTimeout(() => {
+    localStorage.removeItem('bookingData');
+    console.log('Booking data cleared after 5 minutes');
+    clearTimerRef.current = null;
+  }, 5 * 60 * 1000);
+  
+  router.push(`/details/${roomCategory}`);
+};
+
+// Add cleanup on component unmount
+useEffect(() => {
+  return () => {
+    if (clearTimerRef.current) {
+      clearTimeout(clearTimerRef.current);
+    }
   };
+}, []);
+
 
   // Get max guests for current room
   const getMaxGuests = () => {
