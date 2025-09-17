@@ -5,7 +5,7 @@ import Home from "@/components/sections/home/Home";
 export const metadata = {
   title: 'River Tiger Resort & Camping Adventure | Resort in Chakrata, Dehradun',
   description: 'Experience the ultimate getaway at River Tiger Resort & Camping Adventure near Tiger Fall, Chakrata. Enjoy beautiful mountain views, peaceful surroundings, adventure activities, and comfortable accommodation in Dehradun, Uttarakhand.',
-  icons:{
+  icons: {
     icon: '/Home/icon.jpeg',
   },
   keywords: [
@@ -137,11 +137,14 @@ export default function Page() {
   return (
     <>
       {/* JSON-LD structured data */}
+      <head>
+        <link rel="icon" href="/Home/icon.jpeg"></link>
+      </head>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      
+
       <div className="font-sans">
         <Navbar />
         <Home />
