@@ -6,6 +6,9 @@ import Footer from "@/components/sections/home/Footer";
 export const metadata = {
   title: 'Contact Us - River Tiger Resort | Book Your Stay & Get Directions to Chakrata',
   description: 'Contact River Tiger Resort & Camping Adventure for bookings, inquiries, and directions. Located near Tiger Fall, Chakrata, Dehradun. Call us, email, or visit our resort in the beautiful mountains of Uttarakhand for your perfect getaway.',
+  icons:{
+    icon: '/Home/icon.jpeg',
+  },
   keywords: [
     'contact River Tiger Resort',
     'book Chakrata resort',

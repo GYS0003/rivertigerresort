@@ -5,7 +5,9 @@ import { Metadata } from 'next';
 export const metadata = {
   title: 'Privacy Policy - River Tiger Resort',
   description: 'Privacy Policy for River Tiger Resort',
-
+  icons:{
+    icon: '/Home/icon.jpeg',
+  }
 };
 
 

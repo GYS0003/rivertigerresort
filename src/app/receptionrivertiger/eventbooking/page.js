@@ -7,7 +7,9 @@ import EventBoking from '@/components/sections/reception/eventbookings/EventBoki
 export const metadata = {
   title: 'Admin Stay Offline Booking | River Tiger Resort',
   description:'',
- 
+   icons:{
+    icon: '/Home/icon.jpeg',
+  }
 };
 
 

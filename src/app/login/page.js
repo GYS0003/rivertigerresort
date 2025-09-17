@@ -7,7 +7,9 @@ import LoginSignup from '@/components/sections/login/LoginSignup';
 export const metadata = {
   title: 'Login - River Tiger Resort',
   description: 'Login to your account to access your bookings, manage your profile, and enjoy a personalized experience at River Tiger Resort.',
-
+  icons:{
+    icon: '/Home/icon.jpeg',
+  }
 };
 
 

@@ -12,7 +12,9 @@ import AdventureBookings from '@/components/sections/reception/adventurebooking/
 export const metadata = {
   title: 'Admin Stay Offline Booking | River Tiger Resort',
   description:'',
- 
+   icons:{
+    icon: '/Home/icon.jpeg',
+  }
 };
 
 

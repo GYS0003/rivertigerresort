@@ -8,6 +8,9 @@ import Footer from "@/components/sections/home/Footer";
 export const metadata = {
   title: 'About Us - River Tiger Resort & Camping Adventure | Our Story & Mission',
   description: 'Learn about River Tiger Resort & Camping Adventure, a premier 3-star resort near Tiger Fall, Chakrata. Discover our commitment to providing exceptional hospitality, adventure experiences, and sustainable tourism in the beautiful hills of Dehradun, Uttarakhand.',
+  icons: {
+    icon: '/Home/icon.jpeg',
+  },
   keywords: [
     'About River Tiger Resort',
     'resort history Chakrata',
@@ -159,7 +162,7 @@ export default function Page() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      
+
       <div className="font-sans">
         <Navbar />
         <AboutUs />

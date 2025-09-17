@@ -7,7 +7,9 @@ import Footer from "@/components/sections/home/Footer";
 export const metadata = {
   title: 'Adventure | River Tiger Resort',
   description:'',
- 
+ icons:{
+    icon: '/Home/icon.jpeg',
+ }
 };
 
 export default function page() {

@@ -9,7 +9,9 @@ import StayBookings from '@/components/sections/reception/staybookings/StayBooki
 export const metadata = {
   title: 'Admin Stay Offline Booking | River Tiger Resort',
   description:'',
- 
+   icons:{
+    icon: '/Home/icon.jpeg',
+  }
 };
 
 

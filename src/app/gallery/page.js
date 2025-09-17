@@ -6,6 +6,9 @@ import Footer from "@/components/sections/home/Footer";
 export const metadata = {
   title: 'Gallery - River Tiger Resort Photos | Beautiful Views of Chakrata & Tiger Fall',
   description: 'Explore stunning photos of River Tiger Resort & Camping Adventure near Tiger Fall, Chakrata. View our beautiful accommodations, breathtaking mountain views, adventure activities, lush surroundings, and memorable guest experiences in Dehradun, Uttarakhand.',
+  icons: {
+    icon: '/Home/icon.jpeg',
+  },
   keywords: [
     'River Tiger Resort photos',
     'Chakrata resort images',
@@ -187,7 +190,7 @@ export default function Page() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      
+
       <div className="font-sans">
         <Navbar />
         <Gallery />

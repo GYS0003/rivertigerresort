@@ -3,8 +3,11 @@ import Navbar from "@/components/Layout/Navbar";
 import Home from "@/components/sections/home/Home";
 
 export const metadata = {
-  title: 'River Tiger Resort & Camping Adventure | 3-Star Resort in Chakrata, Dehradun',
+  title: 'River Tiger Resort & Camping Adventure | Resort in Chakrata, Dehradun',
   description: 'Experience the ultimate getaway at River Tiger Resort & Camping Adventure near Tiger Fall, Chakrata. Enjoy beautiful mountain views, peaceful surroundings, adventure activities, and comfortable accommodation in Dehradun, Uttarakhand.',
+  icons:{
+    icon: '/Home/icon.jpeg',
+  },
   keywords: [
     'River Tiger Resort',
     'Chakrata resort',
