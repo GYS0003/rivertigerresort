@@ -137,9 +137,7 @@ export default function Page() {
   return (
     <>
       {/* JSON-LD structured data */}
-      <head>
-        <link rel="icon" href="/Home/icon.jpeg"></link>
-      </head>
+      
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
