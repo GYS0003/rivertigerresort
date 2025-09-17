@@ -518,133 +518,127 @@ const DetailMain = () => {
                     </div>
                 </div>
 
-{/* Meals Section - All-in-one Implementation */}
-{(stay.breakfastPrice > 0 || stay.lunchPrice > 0 || stay.dinnerPrice > 0) && (
-    <div className="p-2 sm:p-3 bg-blue-50 rounded-lg shadow-sm mb-4">
-        <h2 className="text-lg sm:text-xl font-bold text-center mb-3 sm:mb-4 text-green-900">
-            Meal Options
-        </h2>
+                {(stay.breakfastPrice > 0 || stay.lunchPrice > 0 || stay.dinnerPrice > 0) && (
+                    <div className="p-2 sm:p-3 bg-blue-50 rounded-lg shadow-sm mb-4">
+                        <h2 className="text-lg sm:text-xl font-bold text-center mb-3 sm:mb-4 text-green-900">
+                            Meal Options
+                        </h2>
 
-        <div className="space-y-3 md:space-y-0 md:grid md:grid-cols-3 md:gap-4">
-            {/* Breakfast */}
-            {stay.breakfastPrice > 0 && (
-                <label className={`flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all duration-300 ${
-                    selectedMeals.breakfast ? 'bg-purple-100 border-purple-300' : 'bg-white border-gray-200 hover:border-gray-300'
-                } ${!showAllMeals ? 'block' : 'block'} md:block`}>
-                    <input type="checkbox" checked={selectedMeals.breakfast} onChange={() => handleMealToggle('breakfast')} className="sr-only" />
-                    <div className={`w-6 h-6 mr-4 mt-0.5 rounded-full border-2 flex items-center justify-center transition-all ${
-                        selectedMeals.breakfast ? 'bg-purple-500 border-purple-500' : 'bg-white border-gray-400'
-                    }`}>
-                        {selectedMeals.breakfast && (
-                            <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                            </svg>
-                        )}
-                    </div>
-                    <div className="flex-1">
-                        <div className="flex justify-between items-center mb-1">
-                            <h3 className={`font-bold ${selectedMeals.breakfast ? 'text-purple-800' : 'text-gray-800'}`}>Breakfast</h3>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                selectedMeals.breakfast ? 'bg-purple-200 text-purple-800' : 'bg-gray-100 text-gray-700'
-                            }`}>₹{stay.breakfastPrice}/person</span>
+                        <div className="space-y-3 md:space-y-0 md:grid md:grid-cols-3 md:gap-4">
+                            {stay.breakfastPrice > 0 && (
+                                <label className={`flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all duration-300 ${selectedMeals.breakfast ? 'bg-purple-100 border-purple-300' : 'bg-white border-gray-200 hover:border-gray-300'
+                                    } ${!showAllMeals ? 'block' : 'block'} md:block`}>
+                                    <div className="flex-1">
+                                        <div className="flex justify-between items-center mb-1">
+                                            <div className='flex justify-start items-center'>
+                                                <input type="checkbox" checked={selectedMeals.breakfast} onChange={() => handleMealToggle('breakfast')} className="sr-only" />
+                                                <div className={`w-4 h-4 mr-2 mt-0.5 rounded-full border-2 flex items-center justify-center transition-all ${selectedMeals.breakfast ? 'bg-purple-500 border-purple-500' : 'bg-white border-gray-400'
+                                                    }`}>
+                                                    {selectedMeals.breakfast && (
+                                                        <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                    )}
+                                                </div>
+                                                <h3 className={`font-bold ${selectedMeals.breakfast ? 'text-purple-800' : 'text-gray-800'}`}>Breakfast</h3>
+                                            </div>
+                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${selectedMeals.breakfast ? 'bg-purple-200 text-purple-800' : 'bg-gray-100 text-gray-700'
+                                                }`}>₹{stay.breakfastPrice}/person</span>
+                                        </div>
+                                        {selectedMeals.breakfast && (
+                                            <div className="mt-3 pt-2 border-t border-purple-200 text-sm">
+                                                <div className="flex justify-between">
+                                                    <span className="text-purple-600">{totalGuests} guests × {numNights} nights</span>
+                                                    <span className="font-semibold text-purple-700">₹{stay.breakfastPrice * totalGuests * numNights}</span>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </label>
+                            )}
+
+                            {stay.lunchPrice > 0 && (
+                                <label className={`flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all duration-300 ${selectedMeals.lunch ? 'bg-purple-100 border-purple-300' : 'bg-white border-gray-200 hover:border-gray-300'
+                                    } ${!showAllMeals ? 'hidden' : 'block'} md:block`}>
+
+                                    <div className="flex-1">
+                                        <div className="flex justify-between items-center mb-1">
+                                            <div className='flex justify-start items-center'>
+                                                <input type="checkbox" checked={selectedMeals.lunch} onChange={() => handleMealToggle('lunch')} className="sr-only" />
+                                                <div className={`w-4 h-4 mr-2 mt-0.5 rounded-full border-2 flex items-center justify-center transition-all ${selectedMeals.lunch ? 'bg-purple-500 border-purple-500' : 'bg-white border-gray-400'
+                                                    }`}>
+                                                    {selectedMeals.lunch && (
+                                                        <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                    )}
+                                                </div>
+                                                <h3 className={`font-bold ${selectedMeals.lunch ? 'text-purple-800' : 'text-gray-800'}`}>Lunch</h3>
+                                            </div>
+                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${selectedMeals.lunch ? 'bg-purple-200 text-purple-800' : 'bg-gray-100 text-gray-700'
+                                                }`}>₹{stay.lunchPrice}/person</span>
+                                        </div>
+                                        {selectedMeals.lunch && (
+                                            <div className="mt-3 pt-2 border-t border-purple-200 text-sm">
+                                                <div className="flex justify-between">
+                                                    <span className="text-purple-600">{totalGuests} guests × {numNights} nights</span>
+                                                    <span className="font-semibold text-purple-700">₹{stay.lunchPrice * totalGuests * numNights}</span>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </label>
+                            )}
+
+                            {stay.meals && stay.dinnerPrice > 0 && (
+                                <label className={`flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all duration-300 ${selectedMeals.dinner ? 'bg-purple-100 border-purple-300' : 'bg-white border-gray-200 hover:border-gray-300'
+                                    } ${!showAllMeals ? 'hidden' : 'block'} md:block`}>
+                                    <div className="flex-1">
+                                        <div className="flex justify-between items-center mb-1">
+                                            <div className='flex justify-start items-center'>
+                                                <input type="checkbox" checked={selectedMeals.dinner} onChange={() => handleMealToggle('dinner')} className="sr-only" />
+                                                <div className={`w-4 h-4 mr-2 mt-0.5 rounded-full border-2 flex items-center justify-center transition-all ${selectedMeals.dinner ? 'bg-purple-500 border-purple-500' : 'bg-white border-gray-400'
+                                                    }`}>
+                                                    {selectedMeals.dinner && (
+                                                        <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                    )}
+                                                </div>
+                                                <h3 className={`font-bold ${selectedMeals.dinner ? 'text-purple-800' : 'text-gray-800'}`}>Dinner</h3>
+                                            </div>
+                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${selectedMeals.dinner ? 'bg-purple-200 text-purple-800' : 'bg-gray-100 text-gray-700'
+                                                }`}>₹{stay.dinnerPrice}/person</span>
+                                        </div>
+                                        {selectedMeals.dinner && (
+                                            <div className="mt-3 pt-2 border-t border-purple-200 text-sm">
+                                                <div className="flex justify-between">
+                                                    <span className="text-purple-600">{totalGuests} guests × {numNights} nights</span>
+                                                    <span className="font-semibold text-purple-700">₹{stay.dinnerPrice * totalGuests * numNights}</span>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </label>
+                            )}
                         </div>
-                        {selectedMeals.breakfast && (
-                            <div className="mt-3 pt-2 border-t border-purple-200 text-sm">
-                                <div className="flex justify-between">
-                                    <span className="text-purple-600">{totalGuests} guests × {numNights} nights</span>
-                                    <span className="font-semibold text-purple-700">₹{stay.breakfastPrice * totalGuests * numNights}</span>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </label>
-            )}
 
-            {/* Lunch */}
-            {stay.lunchPrice > 0 && (
-                <label className={`flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all duration-300 ${
-                    selectedMeals.lunch ? 'bg-purple-100 border-purple-300' : 'bg-white border-gray-200 hover:border-gray-300'
-                } ${!showAllMeals ? 'hidden' : 'block'} md:block`}>
-                    <input type="checkbox" checked={selectedMeals.lunch} onChange={() => handleMealToggle('lunch')} className="sr-only" />
-                    <div className={`w-6 h-6 mr-4 mt-0.5 rounded-full border-2 flex items-center justify-center transition-all ${
-                        selectedMeals.lunch ? 'bg-purple-500 border-purple-500' : 'bg-white border-gray-400'
-                    }`}>
-                        {selectedMeals.lunch && (
-                            <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                            </svg>
-                        )}
-                    </div>
-                    <div className="flex-1">
-                        <div className="flex justify-between items-center mb-1">
-                            <h3 className={`font-bold ${selectedMeals.lunch ? 'text-purple-800' : 'text-gray-800'}`}>Lunch</h3>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                selectedMeals.lunch ? 'bg-purple-200 text-purple-800' : 'bg-gray-100 text-gray-700'
-                            }`}>₹{stay.lunchPrice}/person</span>
+                        {/* Mobile Toggle Button */}
+                        <div className="md:hidden mt-4 text-center">
+                            {((stay.lunchPrice > 0 && stay.breakfastPrice > 0) || (stay.dinnerPrice > 0 && stay.breakfastPrice > 0)) && (
+                                <button
+                                    onClick={() => setShowAllMeals(!showAllMeals)}
+                                    className="inline-flex items-center border p-1 rounded-md text-green-700 hover:text-green-800 font-medium transition-colors"
+                                >
+                                    {showAllMeals ? 'View Less' : 'View All'}
+                                    <svg className={`ml-2 w-4 h-4 transition-transform duration-300 ${showAllMeals ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
+                            )}
                         </div>
-                        {selectedMeals.lunch && (
-                            <div className="mt-3 pt-2 border-t border-purple-200 text-sm">
-                                <div className="flex justify-between">
-                                    <span className="text-purple-600">{totalGuests} guests × {numNights} nights</span>
-                                    <span className="font-semibold text-purple-700">₹{stay.lunchPrice * totalGuests * numNights}</span>
-                                </div>
-                            </div>
-                        )}
                     </div>
-                </label>
-            )}
-
-            {/* Dinner */}
-            {stay.meals &&stay.dinnerPrice > 0 && (
-                <label className={`flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all duration-300 ${
-                    selectedMeals.dinner ? 'bg-purple-100 border-purple-300' : 'bg-white border-gray-200 hover:border-gray-300'
-                } ${!showAllMeals ? 'hidden' : 'block'} md:block`}>
-                    <input type="checkbox" checked={selectedMeals.dinner} onChange={() => handleMealToggle('dinner')} className="sr-only" />
-                    <div className={`w-6 h-6 mr-4 mt-0.5 rounded-full border-2 flex items-center justify-center transition-all ${
-                        selectedMeals.dinner ? 'bg-purple-500 border-purple-500' : 'bg-white border-gray-400'
-                    }`}>
-                        {selectedMeals.dinner && (
-                            <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                            </svg>
-                        )}
-                    </div>
-                    <div className="flex-1">
-                        <div className="flex justify-between items-center mb-1">
-                            <h3 className={`font-bold ${selectedMeals.dinner ? 'text-purple-800' : 'text-gray-800'}`}>Dinner</h3>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                selectedMeals.dinner ? 'bg-purple-200 text-purple-800' : 'bg-gray-100 text-gray-700'
-                            }`}>₹{stay.dinnerPrice}/person</span>
-                        </div>
-                        {selectedMeals.dinner && (
-                            <div className="mt-3 pt-2 border-t border-purple-200 text-sm">
-                                <div className="flex justify-between">
-                                    <span className="text-purple-600">{totalGuests} guests × {numNights} nights</span>
-                                    <span className="font-semibold text-purple-700">₹{stay.dinnerPrice * totalGuests * numNights}</span>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </label>
-            )}
-        </div>
-
-        {/* Mobile Toggle Button */}
-        <div className="md:hidden mt-4 text-center">
-            {((stay.lunchPrice > 0 && stay.breakfastPrice > 0) || (stay.dinnerPrice > 0 && stay.breakfastPrice > 0)) && (
-                <button
-                    onClick={() => setShowAllMeals(!showAllMeals)}
-                    className="inline-flex items-center border p-1 rounded-md text-green-700 hover:text-green-800 font-medium transition-colors"
-                >
-                    {showAllMeals ? 'View Less' : 'View All'}
-                    <svg className={`ml-2 w-4 h-4 transition-transform duration-300 ${showAllMeals ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-            )}
-        </div>
-    </div>
-)}
+                )}
 
 
 
