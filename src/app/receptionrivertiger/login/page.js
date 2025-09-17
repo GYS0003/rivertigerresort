@@ -7,7 +7,9 @@ export const metadata = {
 
   description:
     '',
- 
+   icons:{
+    icon: '/Home/icon.jpeg',
+  }
 };
 
 

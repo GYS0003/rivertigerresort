@@ -10,7 +10,9 @@ import ReceptionRoute from '@/components/wrappers/ReceptionRoute';
 export const metadata = {
   title: 'Admin Stay Offline Booking | River Tiger Resort',
   description:'',
- 
+   icons:{
+    icon: '/Home/icon.jpeg',
+  }
 };
 
 
