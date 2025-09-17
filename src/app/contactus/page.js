@@ -76,7 +76,7 @@ export const metadata = {
   category: 'travel',
   classification: 'Contact Information and Booking Details',
   other: {
-    'contact:phone_number': '+91-XXXXXXXXXX', // Add actual phone number
+    'contact:phone_number': '+91-9389 303576', // Add actual phone number
     'contact:email': 'info@rivertigerresort.com', // Add actual email
     'geo.region': 'IN-UT',
     'geo.placename': 'Chakrata, Dehradun, Uttarakhand',
@@ -101,7 +101,7 @@ const jsonLd = {
     contactPoint: [
       {
         '@type': 'ContactPoint',
-        telephone: '+91-XXXXXXXXXX', // Replace with actual phone number
+        telephone: '+91-9389 303576', // Replace with actual phone number
         contactType: 'reservations',
         areaServed: 'IN',
         availableLanguage: ['English', 'Hindi'],
@@ -114,7 +114,7 @@ const jsonLd = {
       },
       {
         '@type': 'ContactPoint',
-        telephone: '+91-XXXXXXXXXX', // Replace with emergency contact
+        telephone: '+91-9389 303576', // Replace with emergency contact
         contactType: 'customer support',
         areaServed: 'IN',
         availableLanguage: ['English', 'Hindi'],
@@ -140,8 +140,8 @@ const jsonLd = {
     
     // Contact Methods
     email: 'info@rivertigerresort.com', // Replace with actual email
-    telephone: '+91-XXXXXXXXXX', // Replace with actual phone
-    faxNumber: '+91-XXXXXXXXXX', // Add if available
+    telephone: '+91-9389 303576', // Replace with actual phone
+    faxNumber: '+91-9389 303576', // Add if available
     
     // Opening Hours
     openingHoursSpecification: {

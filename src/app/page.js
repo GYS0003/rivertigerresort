@@ -92,7 +92,7 @@ const jsonLd = {
   description: 'A 3-star resort offering adventure and camping experiences near Tiger Fall in Chakrata, Dehradun',
   image: 'https://rivertigerresort.com/images/resort-main.jpg', // Replace with actual URL
   url: 'https://rivertigerresort.com',
-  telephone: '+91-XXXXXXXXXX', // Add actual phone number
+  telephone: '+91-9389 303576', // Add actual phone number
   email: 'info@rivertigerresort.com', // Add actual email
   address: {
     '@type': 'PostalAddress',
