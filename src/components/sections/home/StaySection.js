@@ -17,6 +17,8 @@ export default function StaySection() {
   const [adults, setAdults] = useState(1)
   const [children, setChildren] = useState(0)
   const [showGuestPopup, setShowGuestPopup] = useState(false)
+  // **NEW: State for showing all stays**
+  const [showAllStays, setShowAllStays] = useState(false)
 
   useEffect(() => {
     const fetchStays = async () => {
@@ -80,7 +82,6 @@ export default function StaySection() {
       }
     }
   }, [])
-
 
   const getNextDay = (dateString) => {
     if (!dateString) return ''
@@ -180,9 +181,12 @@ export default function StaySection() {
     }
   }
 
+  // **NEW: Filter stays to show only 3 initially**
+  const displayedStays = showAllStays ? stays : stays.slice(0, 3)
+
   return (
     <section className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      {/* Heading */}
+      {/* **UPDATED: Back to original centered heading** */}
       <div className="text-center mb-10">
         <h2 className="text-2xl sm:text-3xl font-semibold text-green-900">Stay Amidst Nature</h2>
         <p className="text-sm sm:text-base text-gray-600 mt-2">
@@ -190,9 +194,9 @@ export default function StaySection() {
         </p>
       </div>
 
-      {/* Cards */}
+      {/* **UPDATED: Cards - Now using displayedStays** */}
       <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {stays.map((stay) => {
+        {displayedStays.map((stay) => {
           const imageUrl = stay.images && stay.images.length > 0
             ? stay.images[0]
             : getDefaultImage(stay.category);
@@ -200,10 +204,11 @@ export default function StaySection() {
           return (
             <div
               key={stay._id}
-              className={`rounded-xl overflow-hidden shadow-md bg-white transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer relative ${stay.isDisabled
+              className={`rounded-xl overflow-hidden shadow-md bg-white transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer relative ${
+                stay.isDisabled
                   ? 'grayscale opacity-70 hover:opacity-80 cursor-not-allowed'
                   : 'cursor-pointer'
-                }`}
+              }`}
               onClick={() => handleCardClick(stay)}
             >
               <div className="relative w-full h-56 sm:h-64 md:h-72">
@@ -264,25 +269,28 @@ export default function StaySection() {
                   </span>
                 </div>
 
-                <p className={`mb-4 line-clamp-2 ${stay.isDisabled ? 'text-gray-400' : 'text-gray-700'
-                  }`}>
+                <p className={`mb-4 line-clamp-2 ${
+                  stay.isDisabled ? 'text-gray-400' : 'text-gray-700'
+                }`}>
                   {stay.description}
                 </p>
 
                 <div className="flex flex-wrap gap-2 mb-4">
                   {stay.amenities.slice(0, 3).map((amenity, idx) => (
-                    <span key={idx} className={`text-xs px-2 py-1 rounded ${stay.isDisabled
+                    <span key={idx} className={`text-xs px-2 py-1 rounded ${
+                      stay.isDisabled
                         ? 'bg-gray-200 text-gray-500'
                         : 'bg-green-100 text-green-800'
-                      }`}>
+                    }`}>
                       {amenity}
                     </span>
                   ))}
                   {stay.amenities.length > 3 && (
-                    <span className={`text-xs px-2 py-1 rounded ${stay.isDisabled
+                    <span className={`text-xs px-2 py-1 rounded ${
+                      stay.isDisabled
                         ? 'bg-gray-200 text-gray-500'
                         : 'bg-green-100 text-green-800'
-                      }`}>
+                    }`}>
                       +{stay.amenities.length - 3} more
                     </span>
                   )}
@@ -312,6 +320,18 @@ export default function StaySection() {
           )
         })}
       </div>
+
+      {/* **NEW: View All Button - Moved below the cards** */}
+      {stays.length > 3 && (
+        <div className="text-center mt-8">
+          <button
+            onClick={() => setShowAllStays(!showAllStays)}
+            className="bg-green-900 text-white px-6 py-3 rounded-lg hover:bg-green-800 transition font-medium shadow-md"
+          >
+            {showAllStays ? 'Show Less' : 'View All Accommodations'}
+          </button>
+        </div>
+      )}
 
       {stays.length === 0 && !loading && (
         <div className="text-center py-10">
@@ -422,10 +442,11 @@ export default function StaySection() {
                 <div className="flex items-center space-x-3">
                   <button
                     onClick={() => setAdults(prev => Math.max(1, prev - 1))}
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${adults <= 1
-                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      : 'bg-green-700 text-white hover:bg-green-800'
-                      }`}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      adults <= 1
+                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        : 'bg-green-700 text-white hover:bg-green-800'
+                    }`}
                     disabled={adults <= 1}
                   >
                     <span className="sr-only">Decrease adults</span>
@@ -436,10 +457,11 @@ export default function StaySection() {
                   <span className="text-lg font-medium w-6 text-center">{adults}</span>
                   <button
                     onClick={() => setAdults(prev => prev + 1)}
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${adults + children >= selectedStay.maxGuests
-                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      : 'bg-green-700 text-white hover:bg-green-800'
-                      }`}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      adults + children >= selectedStay.maxGuests
+                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        : 'bg-green-700 text-white hover:bg-green-800'
+                    }`}
                     disabled={adults + children >= selectedStay.maxGuests}
                   >
                     <span className="sr-only">Increase adults</span>
@@ -458,10 +480,11 @@ export default function StaySection() {
                 <div className="flex items-center space-x-3">
                   <button
                     onClick={() => setChildren(prev => Math.max(0, prev - 1))}
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${children <= 0
-                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      : 'bg-green-700 text-white hover:bg-green-800'
-                      }`}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      children <= 0
+                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        : 'bg-green-700 text-white hover:bg-green-800'
+                    }`}
                     disabled={children <= 0}
                   >
                     <span className="sr-only">Decrease children</span>
@@ -472,10 +495,11 @@ export default function StaySection() {
                   <span className="text-lg font-medium w-6 text-center">{children}</span>
                   <button
                     onClick={() => setChildren(prev => prev + 1)}
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${adults + children >= selectedStay.maxGuests
-                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      : 'bg-green-700 text-white hover:bg-green-800'
-                      }`}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      adults + children >= selectedStay.maxGuests
+                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        : 'bg-green-700 text-white hover:bg-green-800'
+                    }`}
                     disabled={adults + children >= selectedStay.maxGuests}
                   >
                     <span className="sr-only">Increase children</span>
