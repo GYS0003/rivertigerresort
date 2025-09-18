@@ -67,16 +67,16 @@ export async function POST(req) {
     console.log(`Sending OTP email to: ${email} (${isNewUser ? 'New User' : 'Existing User'})`);
     
     await transporter.sendMail({
-      from: `"Chakrata Resorts" <${process.env.MAIL_USER}>`,
+      from: `"River Tiger Resort" <${process.env.MAIL_USER}>`,
       to: email,
-      subject: `${isNewUser ? 'Verify Your Email Address' : 'Email Verification Required'} – Chakrata Resorts`,
+      subject: `${isNewUser ? 'Verify Your Email Address' : 'Email Verification Required'} – River Tiger Resort`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; background-color: #ffffff;">
-          <h2 style="color: #047857;">${isNewUser ? 'Welcome to Chakrata Resorts' : 'Email Verification'}, ${name}!</h2>
+          <h2 style="color: #047857;">${isNewUser ? 'Welcome to River Tiger Resort' : 'Email Verification'}, ${name}!</h2>
           
           <p style="font-size: 16px; color: #374151;">
             ${isNewUser 
-              ? 'Thank you for signing up with Chakrata Resorts!' 
+              ? 'Thank you for signing up with River Tiger Resort!' 
               : 'You have requested email verification for your account.'
             }
           </p>
@@ -93,12 +93,12 @@ export async function POST(req) {
           <p style="font-size: 14px; color: #6b7280;">If you did not request this email, please ignore it or contact us immediately.</p>
     
           <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;" />
-          <p style="font-size: 12px; color: #9ca3af;">Need help? Reach out to us at support@chakrataresorts.com</p>
+          <p style="font-size: 12px; color: #9ca3af;">Need help? Reach out to us at info.rivertigerresort@gmail.com</p>
         </div>
       `
     });
 
-    console.log(`OTP email sent successfully to: ${email}`);
+    
 
     // Return success response with different messages for each scenario
     return NextResponse.json({ 
@@ -115,7 +115,7 @@ export async function POST(req) {
     }, { status: isNewUser ? 201 : 200 });
 
   } catch (error) {
-    console.error('Error in send-otp route:', error);
+    
     
     // Handle specific email sending errors
     if (error.code === 'EAUTH' || error.responseCode === 535) {
