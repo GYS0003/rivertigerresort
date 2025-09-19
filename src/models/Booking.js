@@ -34,9 +34,9 @@ const BookingSchema = new mongoose.Schema(
       enum: ['pending', 'success', 'failed'],
       default: 'pending'
     },
-    paymentId: { type: String },
+    paymentId: { type: String }, // Keep for backward compatibility
     razorpay_orderId: { type: String },
-    razorpay_payment_id: { type: String },
+    razorpay_payment_id: { type: String}, // **ADDED: Index for faster queries**
     razorpay_signature: { type: String },
     failureReason: { type: String },
     errorCode: { type: String },
@@ -51,16 +51,24 @@ const BookingSchema = new mongoose.Schema(
         enum: ['pending', 'approved', 'rejected', 'processed'],
         default: 'pending',
       },
-      amount: { type: Number, min: 0 },
+      amount: { 
+        type: Number, 
+        min: 0,
+      },
       refundPercentage: { type: Number, min: 0, max: 100 },
       reason: { type: String },
-      razorpay_refund_id: String,
-      requestedAt: Date,
-      processedAt: Date,
+      razorpay_refund_id: { type: String}, // **ADDED: Index for refund tracking**
+      requestedAt: { type: Date },
+      processedAt: { type: Date },
+      // **ADDED: Additional tracking fields**
+      rejectedAt: { type: Date },
+      rejectionReason: { type: String }
     },
   },
   { timestamps: true }
 );
 
-module.exports =
-  mongoose.models.Booking || mongoose.model('Booking', BookingSchema);
+// **ADDED: Compound index for better query performance**
+BookingSchema.index({ razorpay_payment_id: 1, 'refund.status': 1 });
+
+module.exports = mongoose.models.Booking || mongoose.model('Booking', BookingSchema);
