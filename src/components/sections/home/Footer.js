@@ -4,18 +4,39 @@ import { FaFacebookF, FaTwitter, FaInstagram } from 'react-icons/fa'
 
 export default function Footer() {
   return (
-    <footer className="bg-[#163B2A] text-[#F4EBD0] px-4 py-10 sm:px-6 lg:px-12 text-sm font-sans">
+    <footer className="mt-auto bg-[#163B2A] text-[#F4EBD0] px-4 py-10 sm:px-6 lg:px-12 text-sm font-sans">
       {/* Top Section */}
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start gap-10 border-b border-[#F4EBD0]/30 pb-8">
         <div>
           <h3 className="text-xl sm:text-2xl font-serif font-semibold text-white mb-2">River Tiger Resort</h3>
           <p className="text-sm text-[#F4EBD0]">Village Kanasar,<br />Chakrata, Uttarakhand</p>
-          <p className="mt-2 text-[#F4EBD0]">+91 9389 303576</p>
+          
+          {/* **UPDATED: Clickable phone number with tel: link** */}
+          <a 
+            href="tel:+919389303576" 
+            className="mt-2 text-[#F4EBD0] hover:text-white hover:underline transition-colors duration-200 inline-block"
+            aria-label="Call River Tiger Resort"
+          >
+            +91 9389 303576
+          </a>
+          
           <div className="flex gap-4 mt-4">
-            <a href="https://www.facebook.com/RiverTigerResortCampingAdventure/" aria-label="Facebook" className="text-white hover:text-[#F4EBD0]">
+            <a 
+              href="https://www.facebook.com/RiverTigerResortCampingAdventure/" 
+              aria-label="Facebook" 
+              className="text-white hover:text-[#F4EBD0] transition-colors duration-200"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <FaFacebookF />
             </a>
-            <a href='https://www.instagram.com/rivertiger_resort/' aria-label="Instagram" className="text-white hover:text-[#F4EBD0]">
+            <a 
+              href='https://www.instagram.com/rivertiger_resort/' 
+              aria-label="Instagram" 
+              className="text-white hover:text-[#F4EBD0] transition-colors duration-200"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <FaInstagram />
             </a>
           </div>
@@ -23,11 +44,11 @@ export default function Footer() {
 
         {/* Link Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-8 gap-y-3 text-[#F4EBD0] text-sm">
-          <a href="/aboutus" className="hover:underline">About</a>
-          <a href="/gallery" className="hover:underline">Gallery</a>
-          <a href="/contactus" className="hover:underline">Contact Us</a>
-          <a href="/terms-conditions" className="hover:underline">Terms & Conditions</a>
-          <a href="/privacy-policy" className="hover:underline">Privacy Policy</a>
+          <a href="/aboutus" className="hover:underline transition-all duration-200">About</a>
+          <a href="/gallery" className="hover:underline transition-all duration-200">Gallery</a>
+          <a href="/contactus" className="hover:underline transition-all duration-200">Contact Us</a>
+          <a href="/terms-conditions" className="hover:underline transition-all duration-200">Terms & Conditions</a>
+          <a href="/privacy-policy" className="hover:underline transition-all duration-200">Privacy Policy</a>
         </div>
       </div>
 
@@ -40,9 +61,9 @@ export default function Footer() {
           <input
             type="email"
             placeholder="Email Address"
-            className="w-full sm:w-auto px-4 py-2 rounded border border-[#F4EBD0] bg-transparent text-[#F4EBD0] placeholder-[#F4EBD0]/70 focus:outline-none focus:ring-2 focus:ring-amber-300"
+            className="w-full sm:w-auto px-4 py-2 rounded border border-[#F4EBD0] bg-transparent text-[#F4EBD0] placeholder-[#F4EBD0]/70 focus:outline-none focus:ring-2 focus:ring-amber-300 transition-all duration-200"
           />
-          <button className="bg-[#F4EBD0] text-[#163B2A] font-medium px-6 py-2 rounded hover:bg-amber-100 transition">
+          <button className="bg-[#F4EBD0] text-[#163B2A] font-medium px-6 py-2 rounded hover:bg-amber-100 transition-colors duration-200 transform hover:scale-105">
             Subscribe →
           </button>
         </div>
@@ -52,8 +73,15 @@ export default function Footer() {
       <div className="text-center text-xs mt-8 text-[#F4EBD0]/80">
         © 2025 River Tiger Resort. All rights reserved.
         <div className='mt-2'>
-        Powered by <a href="https://www.gystechnologies.in/" target="_blank" rel="noopener noreferrer" className="text-[#F4EBD0] hover:underline">GYS Technologies</a>
-      </div>
+          Powered by <a 
+            href="https://www.gystechnologies.in/" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-[#F4EBD0] hover:underline hover:text-white transition-colors duration-200"
+          >
+            GYS Technologies
+          </a>
+        </div>
       </div>
     </footer>
   )
