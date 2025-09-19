@@ -259,33 +259,6 @@ const UserBooking = () => {
                       </div>
                     </div>
                   </div>
-
-                  {booking.paymentStatus === 'success' && !booking.refund.requested && (
-                    <div className="flex items-end justify-end my-2">
-                      <button
-                        onClick={() => setCancelModal({ open: true, booking, type: 'adventure' })}
-                        className="w-full md:w-auto py-2 px-4 rounded-lg bg-amber-500 text-white text-sm
-                                     hover:bg-amber-600 focus:outline-none">
-                        Cancel booking
-                      </button>
-                    </div>
-                  )}
-
-                  {booking.refund.approved &&
-                    <div className="flex items-end justify-end">
-                      <p className="text-sm text-gray-600">
-                        Refund Status: <span className="font-medium text-green-600">{booking.refund.status}</span>
-                      </p>
-                    </div>
-                  }
-
-                  {booking.refund.requested && !booking.refund.approved &&
-                    <div className="flex items-end justify-end">
-                      <p className="text-sm text-gray-600">
-                        Refund Status: <span className="font-medium text-amber-600">{booking.refund.status}</span>
-                      </p>
-                    </div>
-                  }
                 </div>
               </div>
             ))}
