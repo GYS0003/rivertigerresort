@@ -39,9 +39,9 @@ const UserBooking = () => {
       const headers = { Authorization: `Bearer ${token}` };
 
       const [eventsRes, adventuresRes, staysRes] = await Promise.all([
-        fetch('/api/event/bookings', { headers }),
-        fetch('/api/adventure/bookings', { headers }),
-        fetch('/api/stay/bookings', { headers })
+        fetch('/api/event/userbookings', { headers }),
+        fetch('/api/adventure/userbookings', { headers }),
+        fetch('/api/stay/userbookings', { headers })
       ]);
 
       const [eventData, adventureData, stayData] = await Promise.all([
