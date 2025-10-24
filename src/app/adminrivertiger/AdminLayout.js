@@ -48,6 +48,11 @@ const AdminLayout = ({ children }) => {
       route: '/adminrivertiger/adventures',
     },
     {
+      name: 'Gallery',
+      icon: <FaImage />,
+      route: '/adminrivertiger/gallery',
+    },
+    {
       name: 'Events',
       icon: <FaCalendarAlt />,
       route: '/adminrivertiger/events',
